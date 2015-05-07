@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 from os import path
@@ -9,32 +10,32 @@ from saml2.s_utils import exception_trace
 from s2sproxy.server import WsgiApplication
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-e', dest="entityid",
+                        help="Entity id for the underlying IdP. If not specified, a discovery server will be used instead.")
+    parser.add_argument(dest="config", help="Configuration file for the pysaml sp and idp.")
+    parser.add_argument(dest="server_config", help="Configuration file with server settings.")
+    args = parser.parse_args()
+
     sys.path.insert(0, os.getcwd())
+    server_conf = __import__(args.server_config)
 
-    args = WsgiApplication.arg_parser()
+    wsgi_app = WsgiApplication(args, base_dir=os.getcwd() + "/")
 
-    pefim_server_conf = __import__(args.server_config)
+    SRV = wsgiserver.CherryPyWSGIServer(('0.0.0.0', server_conf.PORT), SessionMiddleware(
+        wsgi_app.run_server,
+        server_conf.SESSION_OPTS))
+    SRV.stats['Enabled'] = True
+
+    if server_conf.HTTPS:
+        SRV.ssl_adapter = ssl_pyopenssl.pyOpenSSLAdapter(server_conf.SERVER_CERT, server_conf.SERVER_KEY,
+                                                         server_conf.CERT_CHAIN)
+    #wsgi_app.logger.info("Server starting")
+    print "Server listening on port: %s" % server_conf.PORT
     try:
-        wsgi_app = WsgiApplication(args, base_dir=os.getcwd() + "/")
-
-        SRV = wsgiserver.CherryPyWSGIServer(('0.0.0.0', pefim_server_conf.PORT), SessionMiddleware(
-            wsgi_app.run_server,
-            pefim_server_conf.SESSION_OPTS))
-        SRV.stats['Enabled'] = True
-
-        if pefim_server_conf.HTTPS:
-            SRV.ssl_adapter = ssl_pyopenssl.pyOpenSSLAdapter(pefim_server_conf.SERVER_CERT, pefim_server_conf.SERVER_KEY,
-                                                             pefim_server_conf.CERT_CHAIN)
-        #wsgi_app.logger.info("Server starting")
-        print "Server listening on port: %s" % pefim_server_conf.PORT
-        try:
-            SRV.start()
-        except KeyboardInterrupt:
-            SRV.stop()
-    except Exception, excp:
-        args = WsgiApplication.arg_parser(error="Invalid configuration in %s or %s, please consult the documentation."
-                                                % (args.config, args.server_config),
-                                          exception=" Exception:%s" % exception_trace(excp))
+        SRV.start()
+    except KeyboardInterrupt:
+        SRV.stop()
 
 if __name__ == '__main__':
     main()
