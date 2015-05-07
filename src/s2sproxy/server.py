@@ -187,7 +187,7 @@ class WsgiApplication(object, ):
         if path.startswith("robots.txt"):
             return self.static(environ, start_response, "robots.txt")
         if path.startswith("static/"):
-            path = path.lstrip("static/")
+            path = path[len("static/"):]
             return self.static(environ, start_response, path)
 
         for regex, spec in self.urls:
