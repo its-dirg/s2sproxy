@@ -6,7 +6,6 @@ import sys
 import traceback
 import importlib
 
-from saml2.config import config_factory
 from saml2.httputil import Response, Unauthorized
 from saml2.httputil import NotFound
 from saml2.httputil import ServiceError
@@ -40,15 +39,10 @@ class WsgiApplication(object, ):
         # read the configuration file
         config = importlib.import_module(args.config)
 
-        # deal with metadata only once
-        _metadata_conf = config.CONFIG["metadata"]
-        _spc = config_factory("sp", args.config)
-        mds = _spc.load_metadata(_metadata_conf)
-        _spc.metadata = mds
-        idp_conf, sp_conf = get_configurations(args.config, metadata_construction=False, metadata=mds, cache=self.cache)
+        idp_conf, sp_conf = get_configurations(args.config, config.CONFIG["metadata"])
 
         self.config = {
-            "SP": _spc,
+            "SP": sp_conf,
             "IDP": idp_conf
         }
 
@@ -275,115 +269,3 @@ class WsgiApplication(object, ):
         # if not valid:
         #     parser.error(message)
         return args
-
-    # ----------------------------------------------------------------------
-
-
-# if __name__ == '__main__':
-#     import argparse
-#     import importlib
-#
-#     from cherrypy import wsgiserver
-#     from cherrypy.wsgiserver import ssl_pyopenssl
-#
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument('-d', dest='debug', action='store_true')
-#     parser.add_argument('-e', dest="entityid")
-#     parser.add_argument(dest="config")
-#     args = parser.parse_args()
-#
-#     # read the configuration file
-#     sys.path.insert(0, ".")
-#     Config = importlib.import_module(args.config)
-#
-#
-#     # ============== Web server ===============
-#
-#     SRV = wsgiserver.CherryPyWSGIServer((Config.HOST, Config.PORT), application)
-#
-#     if Config.HTTPS:
-#         SRV.ssl_adapter = ssl_pyopenssl.pyOpenSSLAdapter(
-#             Config.SERVER_CERT, Config.SERVER_KEY, Config.CERT_CHAIN)
-#
-#     LOGGER.info("Server starting")
-#     if Config.HTTPS:
-#         print "S2S listening on %s:%s using HTTPS" % (Config.HOST, Config.PORT)
-#     else:
-#         print "S2S listening on %s:%s" % (Config.HOST, Config.PORT)
-#
-#     try:
-#         SRV.start()
-#     except KeyboardInterrupt:
-#         SRV.stop()
-
-
-
-
-
-
-
-
-# if __name__ == '__main__':
-#     import argparse
-#     import importlib
-#
-#     from cherrypy import wsgiserver
-#     from cherrypy.wsgiserver import ssl_pyopenssl
-#
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument('-d', dest='debug', action='store_true')
-#     parser.add_argument('-e', dest="entityid")
-#     parser.add_argument(dest="config")
-#     args = parser.parse_args()
-#
-#     # read the configuration file
-#     sys.path.insert(0, ".")
-#     Config = importlib.import_module(args.config)
-#
-#     # deal with metadata only once
-#     _metadata_conf = Config.CONFIG["metadata"]
-#     Config.CONFIG["metadata"] = {}
-#
-#     CONFIG = {
-#         "SP": config_factory("sp", args.config),
-#         "IDP": config_factory("idp", args.config)}
-#
-#     _spc = CONFIG["SP"]
-#     mds = _spc.load_metadata(_metadata_conf)
-#
-#     CONFIG["SP"].metadata = mds
-#     CONFIG["IDP"].metadata = mds
-#
-#     # If entityID is set it means this is a proxy in front of one IdP
-#     if args.entityid:
-#         EntityID = args.entityid
-#         SP_ARGS = {}
-#     else:
-#         EntityID = None
-#         SP_ARGS = {"discosrv": Config.DISCO_SRV}
-#
-#     CACHE = {}
-#     sp = SamlSP(None, None, CONFIG["SP"], CACHE)
-#     URLS.extend(sp.register_endpoints())
-#
-#     idp = SamlIDP(None, None, CONFIG["IDP"], CACHE, None)
-#     URLS.extend(idp.register_endpoints())
-#
-#     # ============== Web server ===============
-#
-#     SRV = wsgiserver.CherryPyWSGIServer((Config.HOST, Config.PORT), application)
-#
-#     if Config.HTTPS:
-#         SRV.ssl_adapter = ssl_pyopenssl.pyOpenSSLAdapter(
-#             Config.SERVER_CERT, Config.SERVER_KEY, Config.CERT_CHAIN)
-#
-#     LOGGER.info("Server starting")
-#     if Config.HTTPS:
-#         print "S2S listening on %s:%s using HTTPS" % (Config.HOST, Config.PORT)
-#     else:
-#         print "S2S listening on %s:%s" % (Config.HOST, Config.PORT)
-#
-#     try:
-#         SRV.start()
-#     except KeyboardInterrupt:
-#         SRV.stop()
