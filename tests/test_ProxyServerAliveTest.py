@@ -4,7 +4,7 @@ __author__ = 'haho0032'
 
 import cherrypy
 from cherrypy.test import helper
-import tests.configurations.proxy_server_conf_local as proxy_server_conf_local
+import tests.configurations.server_conf as proxy_server_conf_local
 from beaker.middleware import SessionMiddleware
 from s2sproxy.server import WsgiApplication
 from argparse import Namespace
@@ -13,11 +13,11 @@ from argparse import Namespace
 class AliveTestCase(helper.CPWebCase):
 
     ARGS = Namespace(debug=False,
-                     entityid=None,
-                     config="pefim_proxy_conf_local",
-                     server_config="pefim_server_conf_local")
+                     entityid="https://example.com/sp.xml",
+                     config="tests.configurations.proxy_conf",
+                     server_config="tests.configurations.server_conf")
 
-    WSGI_APP = WsgiApplication(ARGS, base_dir=path.dirname(path.realpath(__file__)) + "/../")
+    WSGI_APP = WsgiApplication(ARGS, "/Users/regu0004/dev/s2sproxy/example/static")
 
     @staticmethod
     def application(environ, start_response):

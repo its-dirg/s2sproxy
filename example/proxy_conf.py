@@ -14,32 +14,19 @@ try:
     from saml2.sigver import get_xmlsec_binary
 except ImportError:
     get_xmlsec_binary = None
-
-# if get_xmlsec_binary:
-#     xmlsec_path = get_xmlsec_binary(["/opt/local/bin"])
-# else:
-#     xmlsec_path = '/usr/local/bin/xmlsec1'
-
 xmlsec_path = '/usr/local/bin/xmlsec1'
 
-BASEDIR = os.path.abspath(os.path.dirname(__file__))
-
-
 def full_path(local_file):
-    return os.path.join(BASEDIR, local_file)
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    return os.path.join(basedir, local_file)
 
 # TODO GET BASE from server_conf
 HOST = 'localhost'
 PORT = 8090
 
-BASE = "https://%s:%s" % (HOST, PORT)
+BASE = 'https://%s:%s' % (HOST, PORT)
 
-#HTTPS = True
-# HTTPS cert information
-#SERVER_CERT = "pki/mycert.pem"
-#SERVER_KEY = "pki/mykey.pem"
-#CERT_CHAIN = ""
-
+# Discovery to server if proxy is used with multiple IdP's
 # DISCO_SRV = "https://md.nordu.net/role/idp.ds"
 
 CONFIG = {
