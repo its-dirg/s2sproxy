@@ -36,6 +36,7 @@ class WsgiApplication(object, ):
     def __init__(self, args, base_dir):
         self.urls = [(r'.+\.css$', WsgiApplication.css), ]
         self.cache = {}
+        self.debug = args.debug
 
         # read the configuration file
         config = importlib.import_module(args.config)
@@ -217,13 +218,15 @@ class WsgiApplication(object, ):
 
                 try:
                     return self.run_entity(spec, environ, start_response)
-                except Exception, err:
-                    print >> sys.stderr, "%s" % err
-                    message = traceback.format_exception(*sys.exc_info())
-                    print >> sys.stderr, message
-                    LOGGER.exception("%s" % err)
-                    resp = ServiceError("%s" % err)
-                    return resp(environ, start_response)
+                except Exception as err:
+                    if not self.debug:
+                        print >> sys.stderr, "%s" % err
+                        traceback.print_exc()
+                        LOGGER.exception("%s" % err)
+                        resp = ServiceError("%s" % err)
+                        return resp(environ, start_response)
+                    else:
+                        raise
 
         LOGGER.debug("unknown side: %s" % path)
         resp = NotFound("Couldn't find the side you asked for!")
