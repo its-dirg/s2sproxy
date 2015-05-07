@@ -15,8 +15,8 @@ from saml2.response import VerificationError
 from saml2.s_utils import UnknownPrincipal
 from saml2.s_utils import UnsupportedBinding
 
-from service import BINDING_MAP
-import service
+from s2sproxy.service import BINDING_MAP
+import s2sproxy.service as service
 
 logger = logging.getLogger(__name__)
 

@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 from saml2 import BINDING_HTTP_REDIRECT
 from saml2 import BINDING_HTTP_POST
+from saml2.entity_category.edugain import COC
+from saml2.entity_category.swamid import RESEARCH_AND_EDUCATION, HEI, SFS_1993_1153, NREN, EU
 from saml2.extension.idpdisc import BINDING_DISCO
 from saml2.saml import NAME_FORMAT_URI
 from saml2.saml import NAMEID_FORMAT_TRANSIENT
@@ -13,10 +15,12 @@ try:
 except ImportError:
     get_xmlsec_binary = None
 
-if get_xmlsec_binary:
-    xmlsec_path = get_xmlsec_binary(["/opt/local/bin"])
-else:
-    xmlsec_path = '/usr/bin/xmlsec1'
+# if get_xmlsec_binary:
+#     xmlsec_path = get_xmlsec_binary(["/opt/local/bin"])
+# else:
+#     xmlsec_path = '/usr/local/bin/xmlsec1'
+
+xmlsec_path = '/usr/local/bin/xmlsec1'
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -24,22 +28,24 @@ BASEDIR = os.path.abspath(os.path.dirname(__file__))
 def full_path(local_file):
     return os.path.join(BASEDIR, local_file)
 
-HOST = 'localhost'
+# TODO GET BASE from server_conf
+HOST = '130.239.235.106'
 PORT = 8090
 
 BASE = "https://%s:%s" % (HOST, PORT)
 
-HTTPS = True
+#HTTPS = True
 # HTTPS cert information
-SERVER_CERT = "pki/mycert.pem"
-SERVER_KEY = "pki/mykey.pem"
-CERT_CHAIN = ""
+#SERVER_CERT = "pki/mycert.pem"
+#SERVER_KEY = "pki/mykey.pem"
+#CERT_CHAIN = ""
 
 DISCO_SRV = "https://md.nordu.net/role/idp.ds"
 
 CONFIG = {
     "entityid": "%s/proxy.xml" % BASE,
     "description": "A SAML2SAML proxy",
+    "entity_category": [COC, RESEARCH_AND_EDUCATION, HEI, SFS_1993_1153, NREN, EU],
     "valid_for": 168,
     "service": {
         "idp": {
@@ -65,9 +71,9 @@ CONFIG = {
             "want_authn_requests_signed": False
         },
         "sp": {
-            "required_attributes": ["sn", "givenname", "uid",
-                                    "edupersonaffiliation"],
-            "optional_attributes": ["title"],
+            #"required_attributes": ["sn", "givenname", "uid",
+            #                        "edupersonaffiliation"],
+            #"optional_attributes": ["title"],
             "endpoints": {
                 "assertion_consumer_service": [
                     ("%s/acs/post" % BASE, BINDING_HTTP_POST),
@@ -84,8 +90,8 @@ CONFIG = {
     "cert_file": full_path("pki/new_server.crt"),
     "metadata": {
         #"mdfile": ["swamid2.md"],
-        "local": ["/Users/rolandh/code/pysaml2/example/sp-wsgi/sp.xml",
-                  "/Users/rolandh/code/pysaml2/example/idp2/idp.xml"]
+        "local": ["/Users/mathiashedstrom/work/DIRG/pysaml2/example/sp-wsgi/sp.xml",
+                  "/Users/mathiashedstrom/work/DIRG/s2sproxy/example/idp.xml"],
     },
     "organization": {
         "display_name": "Rolands Identiteter",

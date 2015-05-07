@@ -9,7 +9,7 @@ from saml2.httputil import Unauthorized
 from saml2.s_utils import UnknownPrincipal
 from saml2.s_utils import UnsupportedBinding
 from saml2.server import Server
-import service
+import s2sproxy.service as service
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,8 @@ class SamlIDP(service.Service):
             except AttributeError:
                 pass
             else:
-                req_args[key] = val
+                if val is not None:
+                    req_args[key] = val
 
         return {"resp_args": resp_args, "response": _resp,
                 "authn_req": _authn_req, "req_args": req_args}
