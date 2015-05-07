@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import argparse
 import logging
 import mimetypes
 import os
@@ -8,12 +7,14 @@ import sys
 import traceback
 import importlib
 
-from saml2.httputil import Response, Unauthorized
+from saml2.httputil import Unauthorized
 from saml2.httputil import NotFound
 from saml2.httputil import ServiceError
+
 from s2sproxy.back import SamlSP
 from s2sproxy.front import SamlIDP
 from s2sproxy.util.config import get_configurations
+
 
 LOGGER = logging.getLogger("")
 LOGFILE_NAME = 's2s.log'
@@ -25,15 +26,7 @@ hdlr.setFormatter(base_formatter)
 LOGGER.addHandler(hdlr)
 LOGGER.setLevel(logging.DEBUG)
 
-IDP = None
-SP = None
-Config = None
-
-# ==============================================================================
-
-
-class WsgiApplication(object, ):
-
+class WsgiApplication(object):
     def __init__(self, args, static_dir):
         self.urls = []
         self.cache = {}
@@ -43,7 +36,8 @@ class WsgiApplication(object, ):
         # read the configuration file
         config = importlib.import_module(args.config)
 
-        idp_conf, sp_conf = get_configurations(args.config, config.CONFIG["metadata"])
+        idp_conf, sp_conf = get_configurations(args.config,
+                                               config.CONFIG["metadata"])
 
         self.config = {
             "SP": sp_conf,
@@ -64,7 +58,7 @@ class WsgiApplication(object, ):
             self.entity_id = None
             self.sp_args = {"discosrv": config.DISCO_SRV}
 
-    def incomming(self, info, instance, environ, start_response, relay_state):
+    def incoming(self, info, instance, environ, start_response, relay_state):
         """
         An Authentication request has been requested, this is the second step
         in the sequence
@@ -80,7 +74,8 @@ class WsgiApplication(object, ):
 
         # If I know which IdP to authenticate at return a redirect to it
         if self.entity_id:
-            inst = SamlSP(environ, start_response, self.config["SP"], self.cache, self.outgoing)
+            inst = SamlSP(environ, start_response, self.config["SP"],
+                          self.cache, self.outgoing)
             state_key = inst.store_state(info["authn_req"], relay_state,
                                          info["req_args"])
             return inst.authn_request(self.entity_id, state_key)
@@ -124,9 +119,6 @@ class WsgiApplication(object, ):
 
         return resp
 
-    # ==============================================================================
-
-
     def static(self, environ, start_response, path):
         full_path = os.path.join(self.static_dir, os.path.normpath(path))
 
@@ -155,10 +147,12 @@ class WsgiApplication(object, ):
 
         if isinstance(spec, tuple):
             if spec[0] == "SP":
-                inst = SamlSP(environ, start_response, self.config["SP"], self.cache,
+                inst = SamlSP(environ, start_response, self.config["SP"],
+                              self.cache,
                               self.outgoing, **self.sp_args)
             else:
-                inst = SamlIDP(environ, start_response, self.config["IDP"], self.cache,
+                inst = SamlIDP(environ, start_response, self.config["IDP"],
+                               self.cache,
                                self.incomming)
 
             func = getattr(inst, spec[1])

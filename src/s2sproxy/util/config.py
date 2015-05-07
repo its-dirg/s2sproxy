@@ -1,7 +1,5 @@
-import copy
-import importlib
-from saml2.config import config_factory, Config
-from importlib import import_module
+from saml2.config import config_factory
+
 __author__ = 'haho0032'
 
 

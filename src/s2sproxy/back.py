@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import logging
 import time
-
 from urlparse import urlparse
 
 from saml2 import BINDING_HTTP_REDIRECT
@@ -18,10 +17,11 @@ from saml2.s_utils import UnsupportedBinding
 from s2sproxy.service import BINDING_MAP
 import s2sproxy.service as service
 
+
 logger = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------------------
-#  Authentication request constructor
+# Authentication request constructor
 # -----------------------------------------------------------------------------
 
 
@@ -63,7 +63,7 @@ class SamlSP(service.Service):
     def store_state(self, authn_req, relay_state, req_args):
         # Which page was accessed to get here
         came_from = geturl(self.environ)
-        key = hash(came_from+self.environ["REMOTE_ADDR"]+str(time.time()))
+        key = hash(came_from + self.environ["REMOTE_ADDR"] + str(time.time()))
         logger.debug("[sp.challenge] RelayState >> '%s'" % came_from)
         self.cache[key] = (authn_req, relay_state, req_args)
         return key
@@ -173,7 +173,7 @@ class SamlSP(service.Service):
 
         url_map = []
         for endp, binding in self.sp.config.getattr("endpoints", "sp")[
-                "assertion_consumer_service"]:
+            "assertion_consumer_service"]:
             p = urlparse(endp)
             url_map.append(("^%s?(.*)$" % p.path[1:], ("SP", "authn_response",
                                                        BINDING_MAP[binding])))
@@ -181,12 +181,13 @@ class SamlSP(service.Service):
                                                   BINDING_MAP[binding])))
 
         for endp, binding in self.sp.config.getattr("endpoints", "sp")[
-                "discovery_response"]:
+            "discovery_response"]:
             p = urlparse(endp)
             url_map.append(("^%s\?(.*)$" % p.path[1:], ("SP", "disco_response",
                                                         BINDING_MAP[binding])))
 
         return url_map
+
 
 if __name__ == "__main__":
     import sys

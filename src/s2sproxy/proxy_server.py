@@ -1,13 +1,12 @@
 import argparse
 import os
 import sys
-from os import path
-import traceback
+
 from cherrypy import wsgiserver
 from cherrypy.wsgiserver import ssl_pyopenssl
 from beaker.middleware import SessionMiddleware
-from saml2.s_utils import exception_trace
 from werkzeug.debug import DebuggedApplication
+
 from s2sproxy.server import WsgiApplication
 
 

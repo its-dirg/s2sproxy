@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import logging
-
 from urlparse import parse_qs
 
 from saml2 import BINDING_HTTP_REDIRECT
@@ -23,7 +22,7 @@ BINDING_MAP = {
     BINDING_DISCO: "disco"
 }
 
-INV_BINDING_MAP = dict([(y, x) for x, y in BINDING_MAP.items()])
+INV_BINDING_MAP = {v: k for k, v in BINDING_MAP.items()}
 
 
 class Service(object):

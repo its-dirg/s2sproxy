@@ -9,7 +9,9 @@ from saml2.httputil import Unauthorized
 from saml2.s_utils import UnknownPrincipal
 from saml2.s_utils import UnsupportedBinding
 from saml2.server import Server
+
 import s2sproxy.service as service
+
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +168,7 @@ class SamlIDP(service.Service):
 
         url_map = []
         for endp, binding in self.idp.config.getattr("endpoints", "idp")[
-                "single_sign_on_service"]:
+            "single_sign_on_service"]:
             p = urlparse(endp)
             url_map.append(("^%s/(.*)$" % p.path[1:],
                             ("IDP", "handle_authn_request",
