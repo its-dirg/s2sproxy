@@ -29,7 +29,7 @@ def full_path(local_file):
     return os.path.join(BASEDIR, local_file)
 
 # TODO GET BASE from server_conf
-HOST = '130.239.235.106'
+HOST = 'localhost'
 PORT = 8090
 
 BASE = "https://%s:%s" % (HOST, PORT)
@@ -40,7 +40,7 @@ BASE = "https://%s:%s" % (HOST, PORT)
 #SERVER_KEY = "pki/mykey.pem"
 #CERT_CHAIN = ""
 
-DISCO_SRV = "https://md.nordu.net/role/idp.ds"
+# DISCO_SRV = "https://md.nordu.net/role/idp.ds"
 
 CONFIG = {
     "entityid": "%s/proxy.xml" % BASE,
@@ -90,8 +90,8 @@ CONFIG = {
     "cert_file": full_path("pki/new_server.crt"),
     "metadata": {
         #"mdfile": ["swamid2.md"],
-        "local": ["/Users/mathiashedstrom/work/DIRG/pysaml2/example/sp-wsgi/sp.xml",
-                  "/Users/mathiashedstrom/work/DIRG/s2sproxy/example/idp.xml"],
+        "local": ["/Users/regu0004/dev/pysaml2/example/sp-wsgi/sp.xml",
+                  "/Users/regu0004/dev/pysaml2/example/idp2/idp.xml"],
     },
     "organization": {
         "display_name": "Rolands Identiteter",

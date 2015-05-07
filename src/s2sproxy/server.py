@@ -8,7 +8,6 @@ import sys
 import traceback
 import importlib
 
-from saml2.config import config_factory
 from saml2.httputil import Response, Unauthorized
 from saml2.httputil import NotFound
 from saml2.httputil import ServiceError
@@ -44,15 +43,10 @@ class WsgiApplication(object, ):
         # read the configuration file
         config = importlib.import_module(args.config)
 
-        # deal with metadata only once
-        _metadata_conf = config.CONFIG["metadata"]
-        _spc = config_factory("sp", args.config)
-        mds = _spc.load_metadata(_metadata_conf)
-        _spc.metadata = mds
-        idp_conf, sp_conf = get_configurations(args.config, metadata_construction=False, metadata=mds, cache=self.cache)
+        idp_conf, sp_conf = get_configurations(args.config, config.CONFIG["metadata"])
 
         self.config = {
-            "SP": _spc,
+            "SP": sp_conf,
             "IDP": idp_conf
         }
 

@@ -8,7 +8,7 @@ PORT = 8090
 HTTPS = True
 
 #Server hostname
-HOST = "130.239.235.106"
+HOST = "localhost"
 
 if HTTPS:
     BASEURL = "https://%s" % HOST
