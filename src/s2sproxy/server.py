@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import argparse
 import logging
+import mimetypes
+import os
 import re
 import sys
 import traceback
@@ -33,9 +35,10 @@ Config = None
 
 class WsgiApplication(object, ):
 
-    def __init__(self, args, base_dir):
-        self.urls = [(r'.+\.css$', WsgiApplication.css), ]
+    def __init__(self, args, static_dir):
+        self.urls = []
         self.cache = {}
+        self.static_dir = static_dir
         self.debug = args.debug
 
         # read the configuration file
@@ -131,36 +134,20 @@ class WsgiApplication(object, ):
 
 
     def static(self, environ, start_response, path):
-        LOGGER.info("[static]sending: %s" % (path,))
+        full_path = os.path.join(self.static_dir, os.path.normpath(path))
 
-        try:
-            text = open(path).read()
-            if path.endswith(".ico"):
-                start_response('200 OK', [('Content-Type', "image/x-icon")])
-            elif path.endswith(".html"):
-                start_response('200 OK', [('Content-Type', 'text/html')])
-            elif path.endswith(".json"):
-                start_response('200 OK', [('Content-Type', 'application/json')])
-            elif path.endswith(".txt"):
-                start_response('200 OK', [('Content-Type', 'text/plain')])
-            elif path.endswith(".css"):
-                start_response('200 OK', [('Content-Type', 'text/css')])
-            else:
-                start_response('200 OK', [('Content-Type', "text/xml")])
-            return [text]
-        except IOError:
-            resp = NotFound()
-            return resp(environ, start_response)
+        if os.path.exists(full_path):
+            with open(full_path, 'rb') as f:
+                content = f.read()
 
-    @staticmethod
-    def css(environ, start_response):
-        try:
-            info = open(environ["PATH_INFO"]).read()
-            resp = Response(info)
-        except (OSError, IOError):
-            resp = NotFound(environ["PATH_INFO"])
-
-        return resp(environ, start_response)
+            content_type, encoding = mimetypes.guess_type(full_path)
+            headers = [('Content-Type', content_type)]
+            start_response("200 OK", headers)
+            return [content]
+        else:
+            response = NotFound(
+                "File '{}' not found.".format(environ['PATH_INFO']))
+            return response(environ, start_response)
 
     def run_entity(self, spec, environ, start_response):
         """
@@ -203,10 +190,11 @@ class WsgiApplication(object, ):
             resp = Unauthorized()
             return resp(environ, start_response)
 
-        # if path == "robots.txt":
-        #     return static(environ, start_response, "static/robots.txt")
-        # elif path.startswith("static/"):
-        #     return static(environ, start_response, path)
+        if path.startswith("robots.txt"):
+            return self.static(environ, start_response, "robots.txt")
+        if path.startswith("static/"):
+            path = path.lstrip("static/")
+            return self.static(environ, start_response, path)
 
         for regex, spec in self.urls:
             match = re.search(regex, path)

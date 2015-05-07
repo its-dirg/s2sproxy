@@ -23,7 +23,7 @@ def main():
     sys.path.insert(0, os.getcwd())
     server_conf = __import__(args.server_config)
 
-    wsgi_app = WsgiApplication(args, base_dir=os.getcwd() + "/").run_server
+    wsgi_app = WsgiApplication(args, "/Users/regu0004/dev/s2sproxy/example/static").run_server
     if args.debug:
         wsgi_app = DebuggedApplication(wsgi_app)
 
