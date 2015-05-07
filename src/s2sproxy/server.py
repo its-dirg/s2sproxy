@@ -27,10 +27,9 @@ LOGGER.addHandler(hdlr)
 LOGGER.setLevel(logging.DEBUG)
 
 class WsgiApplication(object):
-    def __init__(self, args, static_dir):
+    def __init__(self, args):
         self.urls = []
         self.cache = {}
-        self.static_dir = static_dir
         self.debug = args.debug
 
         # read the configuration file
@@ -118,22 +117,6 @@ class WsgiApplication(object):
             resp_args=resp_args, relay_state=relay_state, sign_response=True)
 
         return resp
-
-    def static(self, environ, start_response, path):
-        full_path = os.path.join(self.static_dir, os.path.normpath(path))
-
-        if os.path.exists(full_path):
-            with open(full_path, 'rb') as f:
-                content = f.read()
-
-            content_type, encoding = mimetypes.guess_type(full_path)
-            headers = [('Content-Type', content_type)]
-            start_response("200 OK", headers)
-            return [content]
-        else:
-            response = NotFound(
-                "File '{}' not found.".format(environ['PATH_INFO']))
-            return response(environ, start_response)
 
     def run_entity(self, spec, environ, start_response):
         """
