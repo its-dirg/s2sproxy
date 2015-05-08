@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import importlib
 import logging
 import re
 import sys
@@ -51,7 +52,8 @@ class WsgiApplication(object):
             self.sp_args = {}
         else:
             self.entity_id = None
-            self.sp_args = {"discosrv": config_file.DISCO_SRV}
+            conf = importlib.import_module(config_file)
+            self.sp_args = {"discosrv": conf.DISCO_SRV}
 
     def incoming(self, info, instance, environ, start_response, relay_state):
         """
