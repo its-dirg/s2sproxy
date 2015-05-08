@@ -43,22 +43,26 @@ def main():
             'server.ssl_certificate_chain': server_conf.CERT_CHAIN,
         })
 
-    cherrypy.tree.graft(SessionMiddleware(wsgi_app, server_conf.SESSION_OPTS),
-                        '/')
     cherrypy.tree.mount(None, '/static', {
         '/': {
             'tools.staticdir.dir': server_conf.STATIC_DIR,
             'tools.staticdir.on': True,
-        },
-        '/robots.txt': {
+        }
+    })
+    cherrypy.tree.mount(None, '/robots.txt', {
+        '/': {
             'tools.staticfile.on': True,
-            'tools.staticfile.filename': "/home/site/style.css"
+            'tools.staticfile.filename': os.path.join(server_conf.STATIC_DIR,
+                                                      "robots.txt")
+
         }
     })
 
+    cherrypy.tree.graft(SessionMiddleware(wsgi_app, server_conf.SESSION_OPTS),
+                        '/')
+
     cherrypy.engine.start()
     cherrypy.engine.block()
-
 
 if __name__ == '__main__':
     main()
