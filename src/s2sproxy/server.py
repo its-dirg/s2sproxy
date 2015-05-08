@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 import logging
-import mimetypes
-import os
 import re
 import sys
 import traceback
@@ -25,6 +23,7 @@ base_formatter = logging.Formatter(
 hdlr.setFormatter(base_formatter)
 LOGGER.addHandler(hdlr)
 LOGGER.setLevel(logging.DEBUG)
+
 
 class WsgiApplication(object):
     def __init__(self, args):
@@ -83,7 +82,6 @@ class WsgiApplication(object):
             return instance.disco_query(info["authn_request"], relay_state,
                                         info["req_args"])
 
-
     def outgoing(self, response, instance):
         """
         An authentication response has been received and now an authentication
@@ -136,13 +134,12 @@ class WsgiApplication(object):
             else:
                 inst = SamlIDP(environ, start_response, self.config["IDP"],
                                self.cache,
-                               self.incomming)
+                               self.incoming)
 
             func = getattr(inst, spec[1])
             return func(*spec[2:])
         else:
             return spec()
-
 
     def run_server(self, environ, start_response):
         """
@@ -160,12 +157,6 @@ class WsgiApplication(object):
         if ".." in path:
             resp = Unauthorized()
             return resp(environ, start_response)
-
-        if path.startswith("robots.txt"):
-            return self.static(environ, start_response, "robots.txt")
-        if path.startswith("static/"):
-            path = path[len("static/"):]
-            return self.static(environ, start_response, path)
 
         for regex, spec in self.urls:
             match = re.search(regex, path)

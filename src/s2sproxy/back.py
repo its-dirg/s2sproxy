@@ -172,16 +172,15 @@ class SamlSP(service.Service):
         """
 
         url_map = []
-        for endp, binding in self.sp.config.getattr("endpoints", "sp")[
-            "assertion_consumer_service"]:
+        sp_endpoints = self.sp.config.getattr("endpoints", "sp")
+        for endp, binding in sp_endpoints["assertion_consumer_service"]:
             p = urlparse(endp)
             url_map.append(("^%s?(.*)$" % p.path[1:], ("SP", "authn_response",
                                                        BINDING_MAP[binding])))
             url_map.append(("^%s$" % p.path[1:], ("SP", "authn_response",
                                                   BINDING_MAP[binding])))
 
-        for endp, binding in self.sp.config.getattr("endpoints", "sp")[
-            "discovery_response"]:
+        for endp, binding in sp_endpoints["discovery_response"]:
             p = urlparse(endp)
             url_map.append(("^%s\?(.*)$" % p.path[1:], ("SP", "disco_response",
                                                         BINDING_MAP[binding])))

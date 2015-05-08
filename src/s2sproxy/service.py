@@ -54,14 +54,14 @@ class Service(object):
         logger.debug("unpack_post:: %s" % _dict)
         try:
             return dict([(k, v[0]) for k, v in _dict.items()])
-        except Exception:
+        except IOError:
             return None
 
     def unpack_soap(self):
         try:
             query = get_post(self.environ)
             return {"SAMLResponse": query, "RelayState": ""}
-        except Exception:
+        except IOError:
             return None
 
     def unpack_either(self):
