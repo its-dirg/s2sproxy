@@ -9,6 +9,7 @@ from saml2.saml import NAME_FORMAT_URI
 from saml2.saml import NAMEID_FORMAT_TRANSIENT
 from saml2.saml import NAMEID_FORMAT_PERSISTENT
 import os.path
+from test_module import TestModule
 
 try:
     from saml2.sigver import get_xmlsec_binary
@@ -21,7 +22,7 @@ def full_path(local_file):
     return os.path.join(basedir, local_file)
 
 # TODO GET BASE from server_conf
-HOST = 'localhost'
+HOST = '130.239.235.106'
 PORT = 8090
 
 BASE = 'https://%s:%s' % (HOST, PORT)
@@ -77,8 +78,8 @@ CONFIG = {
     "cert_file": full_path("pki/new_server.crt"),
     "metadata": {
         #"mdfile": ["swamid2.md"],
-        "local": ["/Users/regu0004/dev/pysaml2/example/sp-wsgi/sp.xml",
-                  "/Users/regu0004/dev/pysaml2/example/idp2/idp.xml"],
+        "local": ["/Users/mathiashedstrom/work/DIRG/pysaml2/example/sp-wsgi/sp.xml",
+                  "/Users/mathiashedstrom/work/DIRG/s2sproxy/example/idp.xml"],
     },
     "organization": {
         "display_name": "Rolands Identiteter",
@@ -97,6 +98,22 @@ CONFIG = {
             "email_address": "support@example.com"
         },
     ],
+
+    "attribute_module": {
+        "module": TestModule({
+            "email": "mail",
+            "testA": "sn",
+            "university": "o",
+            },
+            "mail",
+            "email"),
+        # "translation": {
+        #     "email": "mail",
+        #     "testA": "sn",
+        #     "university": "o",
+        # }
+    },
+
     # This database holds the map between a subjects local identifier and
     # the identifier returned to a SP
     "xmlsec_binary": xmlsec_path,

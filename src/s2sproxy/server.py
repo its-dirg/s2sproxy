@@ -3,6 +3,8 @@ import logging
 import re
 import sys
 import traceback
+from importlib import import_module
+import os
 
 from saml2.config import config_factory
 
@@ -30,6 +32,7 @@ class WsgiApplication(object):
         self.urls = []
         self.cache = {}
         self.debug = debug
+        self._load_attribute_module(config_file)
 
         sp_conf = config_factory("sp", config_file)
         idp_conf = config_factory("idp", config_file)
@@ -52,6 +55,16 @@ class WsgiApplication(object):
         else:
             self.entity_id = None
             self.sp_args = {"discosrv": config_file.DISCO_SRV}
+
+    def _load_attribute_module(self, config_file):
+        head, tail = os.path.split(config_file)
+        if head == "":
+            if sys.path[0] != ".":
+                sys.path.insert(0, ".")
+        else:
+            sys.path.insert(0, head)
+        mod = import_module(tail)
+        self.attribute_module = mod.CONFIG["attribute_module"]["module"]
 
     def incoming(self, info, instance, environ, start_response, relay_state):
         """
@@ -105,6 +118,7 @@ class WsgiApplication(object):
         _authn = {"class_ref": _authn_info[0], "authn_auth": _authn_info[1][0]}
 
         # This is where any possible modification of the assertion is made
+        response.ava = self.attribute_module.get_attributes(response.ava)
 
         # Will signed the response by default
         resp = _idp.construct_authn_response(
