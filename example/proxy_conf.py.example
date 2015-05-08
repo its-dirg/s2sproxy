@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os.path
+
 from saml2 import BINDING_HTTP_REDIRECT
 from saml2 import BINDING_HTTP_POST
 from saml2.entity_category.edugain import COC
-from saml2.entity_category.swamid import RESEARCH_AND_EDUCATION, HEI, SFS_1993_1153, NREN, EU
+from saml2.entity_category.swamid import RESEARCH_AND_EDUCATION, HEI, \
+    SFS_1993_1153, NREN, EU
 from saml2.extension.idpdisc import BINDING_DISCO
 from saml2.saml import NAME_FORMAT_URI
 from saml2.saml import NAMEID_FORMAT_TRANSIENT
 from saml2.saml import NAMEID_FORMAT_PERSISTENT
-import os.path
+
 
 try:
     from saml2.sigver import get_xmlsec_binary
@@ -16,23 +19,24 @@ except ImportError:
     get_xmlsec_binary = None
 xmlsec_path = '/usr/local/bin/xmlsec1'
 
+
 def full_path(local_file):
     basedir = os.path.abspath(os.path.dirname(__file__))
     return os.path.join(basedir, local_file)
 
-# TODO GET BASE from server_conf
 HOST = 'localhost'
 PORT = 8090
 
 BASE = 'https://%s:%s' % (HOST, PORT)
 
 # Discovery to server if proxy is used with multiple IdP's
-# DISCO_SRV = "https://md.nordu.net/role/idp.ds"
+DISCO_SRV = "http://localhost/role/idp.ds"
 
 CONFIG = {
     "entityid": "%s/proxy.xml" % BASE,
     "description": "A SAML2SAML proxy",
-    "entity_category": [COC, RESEARCH_AND_EDUCATION, HEI, SFS_1993_1153, NREN, EU],
+    "entity_category": [COC, RESEARCH_AND_EDUCATION, HEI, SFS_1993_1153, NREN,
+                        EU],
     "valid_for": 168,
     "service": {
         "idp": {
@@ -58,8 +62,8 @@ CONFIG = {
             "want_authn_requests_signed": False
         },
         "sp": {
-            #"required_attributes": ["sn", "givenname", "uid",
-            #                        "edupersonaffiliation"],
+            # "required_attributes": ["sn", "givenname", "uid",
+            # "edupersonaffiliation"],
             #"optional_attributes": ["title"],
             "endpoints": {
                 "assertion_consumer_service": [
@@ -76,7 +80,7 @@ CONFIG = {
     "key_file": full_path("pki/new_server.key"),
     "cert_file": full_path("pki/new_server.crt"),
     "metadata": {
-        #"mdfile": ["swamid2.md"],
+        # "mdfile": ["swamid2.md"],
         "local": ["/Users/regu0004/dev/pysaml2/example/sp-wsgi/sp.xml",
                   "/Users/regu0004/dev/pysaml2/example/idp2/idp.xml"],
     },
