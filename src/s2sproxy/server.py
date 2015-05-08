@@ -3,7 +3,8 @@ import logging
 import re
 import sys
 import traceback
-import importlib
+
+from saml2.config import config_factory
 
 from saml2.httputil import Unauthorized
 from saml2.httputil import NotFound
@@ -11,7 +12,6 @@ from saml2.httputil import ServiceError
 
 from s2sproxy.back import SamlSP
 from s2sproxy.front import SamlIDP
-from s2sproxy.util.config import get_configurations
 
 
 LOGGER = logging.getLogger("")
@@ -26,16 +26,13 @@ LOGGER.setLevel(logging.DEBUG)
 
 
 class WsgiApplication(object):
-    def __init__(self, args):
+    def __init__(self, config_file, entityid=None, debug=False):
         self.urls = []
         self.cache = {}
-        self.debug = args.debug
+        self.debug = debug
 
-        # read the configuration file
-        config = importlib.import_module(args.config)
-
-        idp_conf, sp_conf = get_configurations(args.config,
-                                               config.CONFIG["metadata"])
+        sp_conf = config_factory("sp", config_file)
+        idp_conf = config_factory("idp", config_file)
 
         self.config = {
             "SP": sp_conf,
@@ -49,12 +46,12 @@ class WsgiApplication(object):
         self.urls.extend(idp.register_endpoints())
 
         # If entityID is set it means this is a proxy in front of one IdP
-        if args.entityid:
-            self.entity_id = args.entityid
+        if entityid:
+            self.entity_id = entityid
             self.sp_args = {}
         else:
             self.entity_id = None
-            self.sp_args = {"discosrv": config.DISCO_SRV}
+            self.sp_args = {"discosrv": config_file.DISCO_SRV}
 
     def incoming(self, info, instance, environ, start_response, relay_state):
         """

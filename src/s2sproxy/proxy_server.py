@@ -26,7 +26,8 @@ def main():
     sys.path.insert(0, os.getcwd())
     server_conf = __import__(args.server_config)
 
-    wsgi_app = WsgiApplication(args).run_server
+    wsgi_app = WsgiApplication(args.config, args.entityid,
+                               args.debug).run_server
     if args.debug:
         wsgi_app = DebuggedApplication(wsgi_app)
 
