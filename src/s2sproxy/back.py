@@ -33,7 +33,7 @@ class SamlSP(service.Service):
         self.environ = environ
         self.start_response = start_response
         self.cache = cache
-        self.idp_query_param = "IdpQuery"
+        self.idp_disco_query_param = "entityID"
         self.outgoing = outgoing
         self.discosrv = discosrv
         if bindings:
@@ -52,7 +52,7 @@ class SamlSP(service.Service):
         info = self.unpack_redirect()
 
         try:
-            entity_id = info[self.idp_query_param]
+            entity_id = info[self.idp_disco_query_param]
         except KeyError:
             resp = Unauthorized("You must chose an IdP")
             return resp(self.environ, self.start_response)
@@ -63,7 +63,7 @@ class SamlSP(service.Service):
     def store_state(self, authn_req, relay_state, req_args):
         # Which page was accessed to get here
         came_from = geturl(self.environ)
-        key = hash(came_from + self.environ["REMOTE_ADDR"] + str(time.time()))
+        key = str(hash(came_from + self.environ["REMOTE_ADDR"] + str(time.time())))
         logger.debug("[sp.challenge] RelayState >> '%s'" % came_from)
         self.cache[key] = (authn_req, relay_state, req_args)
         return key
@@ -91,7 +91,8 @@ class SamlSP(service.Service):
         loc = _cli.create_discovery_service_request(self.discosrv, eid,
                                                     **{"return": ret})
 
-        return SeeOther(loc)
+        resp = SeeOther(loc)
+        return resp(self.environ, self.start_response)
 
     def authn_request(self, entity_id, state_key):
         _cli = self.sp
@@ -182,7 +183,7 @@ class SamlSP(service.Service):
 
         for endp, binding in sp_endpoints["discovery_response"]:
             p = urlparse(endp)
-            url_map.append(("^%s\?(.*)$" % p.path[1:], ("SP", "disco_response",
+            url_map.append(("^%s$" % p.path[1:], ("SP", "disco_response",
                                                         BINDING_MAP[binding])))
 
         return url_map

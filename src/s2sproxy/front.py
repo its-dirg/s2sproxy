@@ -121,7 +121,7 @@ class SamlIDP(service.Service):
             logger.debug("HTTPargs: %s" % http_args)
             return self.response(_binding, http_args)
         else:
-            return self.incoming(_dict, self, self.environ, self.start_response,
+            return self.incoming(_dict, self.environ, self.start_response,
                                  _request["RelayState"])
 
     def construct_authn_response(self, identity, name_id, authn, resp_args,

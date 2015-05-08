@@ -55,13 +55,12 @@ class WsgiApplication(object):
             conf = importlib.import_module(config_file)
             self.sp_args = {"discosrv": conf.DISCO_SRV}
 
-    def incoming(self, info, instance, environ, start_response, relay_state):
+    def incoming(self, info, environ, start_response, relay_state):
         """
         An Authentication request has been requested, this is the second step
         in the sequence
 
         :param info: Information about the authentication request
-        :param instance: IDP instance that received the Authentication request
         :param environ: WSGI environment
         :param start_response: WSGI start_response
         :param relay_state:
@@ -70,16 +69,16 @@ class WsgiApplication(object):
         """
 
         # If I know which IdP to authenticate at return a redirect to it
+        inst = SamlSP(environ, start_response, self.config["SP"],
+                      self.cache, self.outgoing, **self.sp_args)
         if self.entity_id:
-            inst = SamlSP(environ, start_response, self.config["SP"],
-                          self.cache, self.outgoing)
             state_key = inst.store_state(info["authn_req"], relay_state,
                                          info["req_args"])
             return inst.authn_request(self.entity_id, state_key)
         else:
             # start the process by finding out which IdP to authenticate at
-            return instance.disco_query(info["authn_request"], relay_state,
-                                        info["req_args"])
+            return inst.disco_query(info["authn_req"], relay_state,
+                                    info["req_args"])
 
     def outgoing(self, response, instance):
         """
