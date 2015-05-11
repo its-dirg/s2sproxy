@@ -4,3 +4,4 @@
 example/*_conf.py
 *.xml
 *.db
+*static/
