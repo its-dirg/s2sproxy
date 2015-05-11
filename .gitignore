@@ -3,3 +3,4 @@
 *.log
 example/*_conf.py
 *.xml
+*.db
