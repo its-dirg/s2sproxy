@@ -181,10 +181,11 @@ class SamlSP(service.Service):
             url_map.append(("^%s$" % p.path[1:], ("SP", "authn_response",
                                                   BINDING_MAP[binding])))
 
-        for endp, binding in sp_endpoints["discovery_response"]:
-            p = urlparse(endp)
-            url_map.append(("^%s$" % p.path[1:], ("SP", "disco_response",
-                                                        BINDING_MAP[binding])))
+        if self.discosrv:
+            for endp, binding in sp_endpoints["discovery_response"]:
+                p = urlparse(endp)
+                url_map.append(("^%s$" % p.path[1:], ("SP", "disco_response",
+                                                            BINDING_MAP[binding])))
 
         return url_map
 
