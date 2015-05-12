@@ -1,29 +1,21 @@
+import json
+
 __author__ = 'mathiashedstrom'
 
 from s2sproxy.util.attribute_module_base import AttributeModuleBase
 
+
 class TestModule(AttributeModuleBase):
+    def __init__(self, json_file, translation, attribute_matcher):
+        AttributeModuleBase.__init__(self, translation, attribute_matcher)
 
-    def _get_user_data(self):
-        return [
-            {"email": ["a@test.com"],
-             "testA": ["a@valueA"],
-             "testB": ["a@valueB"]},
-            {"email": ["b@test.com"],
-             "testA": ["b@valueA"],
-             "testB": ["b@valueB"]},
-            {"email": ["c@test.com"],
-             "testA": ["c@valueA"],
-             "testB": ["c@valueB"]}
-                ]
+        with open(json_file) as f:
+            self.user_data = json.load(f)
 
-    def _get_global_data(self):
-        return {
-                "university": "small university",
-                "co": "sweden",
-                }
+        self.global_data = {'university': 'Small university', 'co': 'Sweden'}
 
-    def get_attributes(self, eduid_attributes):
-        attributes = super(TestModule,self).get_attributes(eduid_attributes)
-        eduid_attributes.update(attributes)
-        return eduid_attributes
+    def get_user_data(self):
+        return self.user_data
+
+    def get_global_data(self):
+        return self.global_data

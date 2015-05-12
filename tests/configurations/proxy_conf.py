@@ -3,6 +3,8 @@
 
 from saml2 import BINDING_HTTP_REDIRECT
 from saml2 import BINDING_HTTP_POST
+from example.test_module import TestModule
+from s2sproxy.util.attribute_module_base import SingleAttributeMatcher
 
 
 BASE = 'https://example.com'
@@ -33,4 +35,8 @@ CONFIG = {
         "local": ["configurations/unittest_idp.xml",
                   "configurations/unittest_sp.xml"],
     },
+    "attribute_module": TestModule("users.json", {"email": "mail",
+                                                  "testA": "sn",
+                                                  "university": "o"},
+                                   SingleAttributeMatcher("mail", "email")),
 }

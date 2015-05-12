@@ -1,0 +1,22 @@
+[
+  {
+    "email": ["a@test.com"],
+    "testA": ["a@valueA"],
+    "testB": ["a@valueB"]
+  },
+  {
+    "email": ["b@test.com"],
+    "testA": ["b@valueA"],
+    "testB": ["b@valueB"]
+  },
+  {
+    "email": ["c@test.com"],
+    "testA": ["c@valueA"],
+    "testB": ["c@valueB"]
+  },
+  {
+    "email": ["test1@example.com"],
+    "testA": ["test1@valueA"],
+    "testB": ["test1@valueB"]
+  }
+]

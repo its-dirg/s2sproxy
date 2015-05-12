@@ -10,6 +10,7 @@ from saml2.saml import NAME_FORMAT_URI
 from saml2.saml import NAMEID_FORMAT_TRANSIENT
 from saml2.saml import NAMEID_FORMAT_PERSISTENT
 import os.path
+from s2sproxy.util.attribute_module_base import SingleAttributeMatcher
 from test_module import TestModule
 
 try:
@@ -17,6 +18,7 @@ try:
 except ImportError:
     get_xmlsec_binary = None
 xmlsec_path = '/usr/local/bin/xmlsec1'
+
 
 def full_path(local_file):
     basedir = os.path.abspath(os.path.dirname(__file__))
@@ -63,7 +65,7 @@ CONFIG = {
         "sp": {
             # "required_attributes": ["sn", "givenname", "uid",
             # "edupersonaffiliation"],
-            #"optional_attributes": ["title"],
+            # "optional_attributes": ["title"],
             "endpoints": {
                 "assertion_consumer_service": [
                     ("%s/acs/post" % BASE, BINDING_HTTP_POST),
@@ -99,15 +101,10 @@ CONFIG = {
         },
     ],
 
-    "attribute_module": {
-        "module": TestModule({
-            "email": "mail",
-            "testA": "sn",
-            "university": "o",
-            },
-            "mail",
-            "email"),
-    },
+    "attribute_module": TestModule("users.json", {"email": "mail",
+                                                  "testA": "sn",
+                                                  "university": "o"},
+                                   SingleAttributeMatcher("mail", "email")),
 
     # This database holds the map between a subjects local identifier and
     # the identifier returned to a SP

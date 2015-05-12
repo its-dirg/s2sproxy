@@ -14,6 +14,7 @@ USERS = {
     'test1': {
         'c': 'SE',
         'displayName': 'Test1',
+        'mail': 'test1@example.com',
         'eduPersonPrincipalName': 'test1@example.com',
         'eduPersonScopedAffiliation': 'staff@example.com',
         'eduPersonTargetedID': 'one!for!all',
@@ -69,6 +70,8 @@ class ProxyTest(helper.CPWebCase):
                                                     BINDING_HTTP_REDIRECT)
         identity = resp.ava
         assert identity["displayName"][0] == "Test1"
+        assert identity["sn"][0] == "test1@valueA"
+        assert identity['o'][0] == "Small university"
 
     def get_redirect_location(self, headers):
         for header, value in headers:
