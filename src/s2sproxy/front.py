@@ -9,13 +9,15 @@ from saml2.httputil import Unauthorized
 from saml2.s_utils import UnknownPrincipal
 from saml2.s_utils import UnsupportedBinding
 from saml2.server import Server
+
 import s2sproxy.service as service
+
 
 logger = logging.getLogger(__name__)
 
 
 class SamlIDP(service.Service):
-    def __init__(self, environ, start_response, conf, cache, incomming):
+    def __init__(self, environ, start_response, conf, cache, incoming):
         """
         Constructor for the class.
         :param environ: WSGI environ
@@ -26,7 +28,7 @@ class SamlIDP(service.Service):
         service.Service.__init__(self, environ, start_response)
         self.response_bindings = None
         self.idp = Server(config=conf, cache=cache)
-        self.incomming = incomming
+        self.incoming = incoming
 
     def verify_request(self, query, binding):
         """ Parses and verifies the SAML Authentication Request
@@ -119,8 +121,8 @@ class SamlIDP(service.Service):
             logger.debug("HTTPargs: %s" % http_args)
             return self.response(_binding, http_args)
         else:
-            return self.incomming(_dict, self, self.environ,
-                                  self.start_response, _request["RelayState"])
+            return self.incoming(_dict, self.environ, self.start_response,
+                                 _request["RelayState"])
 
     def construct_authn_response(self, identity, name_id, authn, resp_args,
                                  relay_state, sign_response=True):
@@ -165,8 +167,8 @@ class SamlIDP(service.Service):
         """
 
         url_map = []
-        for endp, binding in self.idp.config.getattr("endpoints", "idp")[
-                "single_sign_on_service"]:
+        idp_endpoints = self.idp.config.getattr("endpoints", "idp")
+        for endp, binding in idp_endpoints["single_sign_on_service"]:
             p = urlparse(endp)
             url_map.append(("^%s/(.*)$" % p.path[1:],
                             ("IDP", "handle_authn_request",

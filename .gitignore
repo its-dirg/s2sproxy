@@ -1,3 +1,7 @@
 .idea
 *.pyc
-*.log
+*.log*
+example/*_conf.py
+*.xml
+*.db
+*static/

@@ -1,17 +1,19 @@
 #!/usr/bin/env python
-import argparse
+import importlib
 import logging
 import re
 import sys
 import traceback
-import importlib
 
-from saml2.httputil import Response, Unauthorized
+from saml2.config import config_factory
+
+from saml2.httputil import Unauthorized
 from saml2.httputil import NotFound
 from saml2.httputil import ServiceError
+
 from s2sproxy.back import SamlSP
 from s2sproxy.front import SamlIDP
-from s2sproxy.util.config import get_configurations
+
 
 LOGGER = logging.getLogger("")
 LOGFILE_NAME = 's2s.log'
@@ -23,23 +25,15 @@ hdlr.setFormatter(base_formatter)
 LOGGER.addHandler(hdlr)
 LOGGER.setLevel(logging.DEBUG)
 
-IDP = None
-SP = None
-Config = None
 
-# ==============================================================================
-
-
-class WsgiApplication(object, ):
-
-    def __init__(self, args, base_dir):
-        self.urls = [(r'.+\.css$', WsgiApplication.css), ]
+class WsgiApplication(object):
+    def __init__(self, config_file, entityid=None, debug=False):
+        self.urls = []
         self.cache = {}
+        self.debug = debug
 
-        # read the configuration file
-        config = importlib.import_module(args.config)
-
-        idp_conf, sp_conf = get_configurations(args.config, config.CONFIG["metadata"])
+        sp_conf = config_factory("sp", config_file)
+        idp_conf = config_factory("idp", config_file)
 
         self.config = {
             "SP": sp_conf,
@@ -53,20 +47,20 @@ class WsgiApplication(object, ):
         self.urls.extend(idp.register_endpoints())
 
         # If entityID is set it means this is a proxy in front of one IdP
-        if args.entityid:
-            self.entity_id = args.entityid
+        if entityid:
+            self.entity_id = entityid
             self.sp_args = {}
         else:
             self.entity_id = None
-            self.sp_args = {"discosrv": config.DISCO_SRV}
+            conf = importlib.import_module(config_file)
+            self.sp_args = {"discosrv": conf.DISCO_SRV}
 
-    def incomming(self, info, instance, environ, start_response, relay_state):
+    def incoming(self, info, environ, start_response, relay_state):
         """
         An Authentication request has been requested, this is the second step
         in the sequence
 
         :param info: Information about the authentication request
-        :param instance: IDP instance that received the Authentication request
         :param environ: WSGI environment
         :param start_response: WSGI start_response
         :param relay_state:
@@ -75,16 +69,16 @@ class WsgiApplication(object, ):
         """
 
         # If I know which IdP to authenticate at return a redirect to it
+        inst = SamlSP(environ, start_response, self.config["SP"],
+                      self.cache, self.outgoing, **self.sp_args)
         if self.entity_id:
-            inst = SamlSP(environ, start_response, self.config["SP"], self.cache, self.outgoing)
             state_key = inst.store_state(info["authn_req"], relay_state,
                                          info["req_args"])
             return inst.authn_request(self.entity_id, state_key)
         else:
             # start the process by finding out which IdP to authenticate at
-            return instance.disco_query(info["authn_request"], relay_state,
-                                        info["req_args"])
-
+            return inst.disco_query(info["authn_req"], relay_state,
+                                    info["req_args"])
 
     def outgoing(self, response, instance):
         """
@@ -120,41 +114,6 @@ class WsgiApplication(object, ):
 
         return resp
 
-    # ==============================================================================
-
-
-    def static(self, environ, start_response, path):
-        LOGGER.info("[static]sending: %s" % (path,))
-
-        try:
-            text = open(path).read()
-            if path.endswith(".ico"):
-                start_response('200 OK', [('Content-Type', "image/x-icon")])
-            elif path.endswith(".html"):
-                start_response('200 OK', [('Content-Type', 'text/html')])
-            elif path.endswith(".json"):
-                start_response('200 OK', [('Content-Type', 'application/json')])
-            elif path.endswith(".txt"):
-                start_response('200 OK', [('Content-Type', 'text/plain')])
-            elif path.endswith(".css"):
-                start_response('200 OK', [('Content-Type', 'text/css')])
-            else:
-                start_response('200 OK', [('Content-Type', "text/xml")])
-            return [text]
-        except IOError:
-            resp = NotFound()
-            return resp(environ, start_response)
-
-    @staticmethod
-    def css(environ, start_response):
-        try:
-            info = open(environ["PATH_INFO"]).read()
-            resp = Response(info)
-        except (OSError, IOError):
-            resp = NotFound(environ["PATH_INFO"])
-
-        return resp(environ, start_response)
-
     def run_entity(self, spec, environ, start_response):
         """
         Picks entity and method to run by that entity.
@@ -167,17 +126,18 @@ class WsgiApplication(object, ):
 
         if isinstance(spec, tuple):
             if spec[0] == "SP":
-                inst = SamlSP(environ, start_response, self.config["SP"], self.cache,
+                inst = SamlSP(environ, start_response, self.config["SP"],
+                              self.cache,
                               self.outgoing, **self.sp_args)
             else:
-                inst = SamlIDP(environ, start_response, self.config["IDP"], self.cache,
-                               self.incomming)
+                inst = SamlIDP(environ, start_response, self.config["IDP"],
+                               self.cache,
+                               self.incoming)
 
             func = getattr(inst, spec[1])
             return func(*spec[2:])
         else:
             return spec()
-
 
     def run_server(self, environ, start_response):
         """
@@ -196,11 +156,6 @@ class WsgiApplication(object, ):
             resp = Unauthorized()
             return resp(environ, start_response)
 
-        # if path == "robots.txt":
-        #     return static(environ, start_response, "static/robots.txt")
-        # elif path.startswith("static/"):
-        #     return static(environ, start_response, path)
-
         for regex, spec in self.urls:
             match = re.search(regex, path)
             if match is not None:
@@ -211,61 +166,16 @@ class WsgiApplication(object, ):
 
                 try:
                     return self.run_entity(spec, environ, start_response)
-                except Exception, err:
-                    print >> sys.stderr, "%s" % err
-                    message = traceback.format_exception(*sys.exc_info())
-                    print >> sys.stderr, message
-                    LOGGER.exception("%s" % err)
-                    resp = ServiceError("%s" % err)
-                    return resp(environ, start_response)
+                except Exception as err:
+                    if not self.debug:
+                        print >> sys.stderr, "%s" % err
+                        traceback.print_exc()
+                        LOGGER.exception("%s" % err)
+                        resp = ServiceError("%s" % err)
+                        return resp(environ, start_response)
+                    else:
+                        raise
 
         LOGGER.debug("unknown side: %s" % path)
         resp = NotFound("Couldn't find the side you asked for!")
         return resp(environ, start_response)
-
-    @staticmethod
-    def arg_parser(args=None, error=None, exception=None):
-        #Read arguments.
-        parser = argparse.ArgumentParser()
-        #True if the server should save debug logs.
-        parser.add_argument('-d', dest='debug', action='store_true', help="Not implemented yet.")
-        parser.add_argument('-pe', dest='pe', action='store_true', help="Add this flag to print the exception that "
-                                                                        "that is the reason for an invalid "
-                                                                        "configuration error.")
-        parser.add_argument('-e', dest="entityid", help="Entity id for the underlying IdP if only one IdP should be"
-                                                        " used. Otherwise will a discovery server be used.")
-        # parser.add_argument('-e_alg', dest="e_alg", help="Encryption algorithm to be used for target id 2. "
-        #                                                  "Approved values: aes_128_cbc, aes_128_cfb, aes_128_ecb, "
-        #                                                  "aes_192_cbc, aes_192_cfb, aes_192_ecb, aes_256_cbc, "
-        #                                                  "aes_256_cfb and aes_256_ecb"
-        #                                                  "Default is aes_128_cbc if flag is left out.")
-        # parser.add_argument('-key', dest="key", help="Encryption key to be used for target id2."
-        #                                              "Approved values is a valid key for the chosen encryption "
-        #                                              "algorithm in e_alg.")
-        # parser.add_argument('-h_alg', dest="h_alg", help="Hash algorithm to be used for target id 2 and the proxy "
-        #                                                  "userid. Approved values: md5, sha1, sha224, sha256, sha384, "
-        #                                                  "sha512 Default is sha256 if flag is left out.")
-        # parser.add_argument('-iv', dest="iv", help="Initialization vector to be used for the encryption. "
-        #                                            "Default is to create a random value for each call if the "
-        #                                            "encrypted messages can be saved, otherwise will the same "
-        #                                            "random value be used for each call. If the same iv is to be"
-        #                                            " used each call its recommended to assign a value to make "
-        #                                            "sure the same iv is used if the server restart.")
-        parser.add_argument(dest="config", help="Configuration file for the pysaml sp and idp.")
-        parser.add_argument(dest="server_config", help="Configuration file with server settings.")
-        if args is not None:
-            args = parser.parse_args(args)
-        else:
-            args = parser.parse_args()
-        if error:
-            if args.pe:
-                error += "\n%s" % exception
-            parser.error(error)
-
-        # valid, message = WsgiApplication.validate_server_config(args)
-        # if not valid:
-        #     parser.error(message)
-        # valid, message = WsgiApplication.validate_config(args)
-        # if not valid:
-        #     parser.error(message)
-        return args
