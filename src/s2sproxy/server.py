@@ -42,15 +42,8 @@ class WsgiApplication(object):
             "IDP": idp_conf
         }
 
-        sp = SamlSP(None, None, self.config["SP"], self.cache)
-        self.urls.extend(sp.register_endpoints())
-
-        idp = SamlIDP(None, None, self.config["IDP"], self.cache, None)
-        self.urls.extend(idp.register_endpoints())
-
         conf = importlib.import_module(config_file)
         self.attribute_module = conf.CONFIG["attribute_module"]
-
         # If entityID is set it means this is a proxy in front of one IdP
         if entityid:
             self.entity_id = entityid
@@ -58,6 +51,14 @@ class WsgiApplication(object):
         else:
             self.entity_id = None
             self.sp_args = {"discosrv": conf.DISCO_SRV}
+
+        sp = SamlSP(None, None, self.config["SP"], self.cache, **self.sp_args)
+        self.urls.extend(sp.register_endpoints())
+
+        idp = SamlIDP(None, None, self.config["IDP"], self.cache, None)
+        self.urls.extend(idp.register_endpoints())
+
+
 
     def incoming(self, info, environ, start_response, relay_state):
         """
