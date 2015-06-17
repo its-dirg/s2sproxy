@@ -1,21 +1,19 @@
 #!/usr/bin/env python
 import importlib
 import logging
-import os
 import re
 import sys
 import traceback
 
 from saml2.config import config_factory
-
 from saml2.httputil import Unauthorized
 from saml2.httputil import NotFound
+
 from saml2.httputil import ServiceError
 
 from s2sproxy.back import SamlSP
 from s2sproxy.front import SamlIDP
 from s2sproxy.util.attribute_module_base import NoUserData
-
 
 LOGGER = logging.getLogger("")
 LOGFILE_NAME = 's2s.log'
@@ -57,8 +55,6 @@ class WsgiApplication(object):
 
         idp = SamlIDP(None, None, self.config["IDP"], self.cache, None)
         self.urls.extend(idp.register_endpoints())
-
-
 
     def incoming(self, info, environ, start_response, relay_state):
         """
@@ -112,8 +108,7 @@ class WsgiApplication(object):
 
         # This is where any possible modification of the assertion is made
         try:
-            response.ava.update(
-                self.attribute_module.get_attributes(response.ava))
+            response.ava = self.attribute_module.get_attributes(response.ava)
         except NoUserData as e:
             LOGGER.error(
                 "User authenticated at IdP but not found by attribute module.")

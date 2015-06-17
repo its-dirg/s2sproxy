@@ -5,21 +5,7 @@ class NoUserData(Exception):
     pass
 
 
-class SingleAttributeMatcher(object):
-    def __init__(self, idp_attribute_name, backing_attribute_name):
-        self.idp_attribute_name = idp_attribute_name
-        self.backing_attribute_name = backing_attribute_name
-
-    def __call__(self, user, idp_attribute_values):
-        return any(value in user[self.backing_attribute_name] for value in
-                   idp_attribute_values[self.idp_attribute_name])
-
-
-class AttributeModuleBase(object):
-    def __init__(self, translation, attribute_matcher):
-        self.translation = translation
-        self.attribute_matcher = attribute_matcher
-
+class AttributeModule(object):
     def get_user_data(self):
         raise NotImplementedError
 
