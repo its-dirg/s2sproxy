@@ -13,7 +13,7 @@ from saml2.httputil import ServiceError
 
 from s2sproxy.back import SamlSP
 from s2sproxy.front import SamlIDP
-from s2sproxy.util.attribute_module_base import NoUserData
+from s2sproxy.util.attribute_module import NoUserData
 
 LOGGER = logging.getLogger("")
 LOGFILE_NAME = 's2s.log'
@@ -41,7 +41,7 @@ class WsgiApplication(object):
         }
 
         conf = importlib.import_module(config_file)
-        self.attribute_module = conf.CONFIG["attribute_module"]
+        self.attribute_module = conf.ATTRIBUTE_MODULE
         # If entityID is set it means this is a proxy in front of one IdP
         if entityid:
             self.entity_id = entityid
