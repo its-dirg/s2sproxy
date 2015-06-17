@@ -10,8 +10,7 @@ from saml2.saml import NAME_FORMAT_URI
 from saml2.saml import NAMEID_FORMAT_TRANSIENT
 from saml2.saml import NAMEID_FORMAT_PERSISTENT
 import os.path
-from s2sproxy.util.attribute_module_base import SingleAttributeMatcher
-from test_module import TestModule
+from s2sproxy.util.attribute_module import IdentityAttributes
 
 try:
     from saml2.sigver import get_xmlsec_binary
@@ -32,6 +31,8 @@ BASE = 'https://%s:%s' % (HOST, PORT)
 
 # Discovery to server if proxy is used with multiple IdP's
 DISCO_SRV = "http://localhost/role/idp.ds"
+
+ATTRIBUTE_MODULE = IdentityAttributes()
 
 CONFIG = {
     "entityid": "%s/proxy.xml" % BASE,
@@ -100,11 +101,6 @@ CONFIG = {
             "email_address": "support@example.com"
         },
     ],
-
-    "attribute_module": TestModule("users.json", {"email": "mail",
-                                                  "testA": "sn",
-                                                  "university": "o"},
-                                   SingleAttributeMatcher("mail", "email")),
 
     # This database holds the map between a subjects local identifier and
     # the identifier returned to a SP
