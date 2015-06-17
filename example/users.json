@@ -1,22 +1,12 @@
-[
-  {
-    "email": ["a@test.com"],
-    "testA": ["a@valueA"],
-    "testB": ["a@valueB"]
+{
+  "haho@example.com": {
+    "mail": "haho@test.com",
+    "testA": "haho@valueA",
+    "testB": "haho@valueB"
   },
-  {
-    "email": ["b@test.com"],
-    "testA": ["b@valueA"],
-    "testB": ["b@valueB"]
-  },
-  {
-    "email": ["c@test.com"],
-    "testA": ["c@valueA"],
-    "testB": ["c@valueB"]
-  },
-  {
-    "email": ["test1@example.com"],
-    "testA": ["test1@valueA"],
-    "testB": ["test1@valueB"]
+  "rohe@example.com": {
+    "mail": "rohe@test.com",
+    "testA": "rohe@valueA",
+    "testB": "rohe@valueB"
   }
-]
+}

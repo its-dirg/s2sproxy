@@ -1,21 +1,43 @@
 import json
 
-__author__ = 'mathiashedstrom'
-
-from s2sproxy.util.attribute_module_base import AttributeModuleBase
+from s2sproxy.util.attribute_module import AttributeModule, NoUserData
 
 
-class TestModule(AttributeModuleBase):
-    def __init__(self, json_file, translation, attribute_matcher):
-        AttributeModuleBase.__init__(self, translation, attribute_matcher)
+class TestModule(AttributeModule):
+    def __init__(self, json_file, idp_attribute_name):
+        self.idp_attribute_name = idp_attribute_name
 
         with open(json_file) as f:
             self.user_data = json.load(f)
 
         self.global_data = {'university': 'Small university', 'co': 'Sweden'}
 
-    def get_user_data(self):
-        return self.user_data
+    def get_attributes(self, idp_attributes):
+        try:
+            user_id = idp_attributes[self.idp_attribute_name][0]
+        except KeyError:
+            raise NoUserData(
+                "Necessary attribute '{}' not returned by IdP.".format(
+                    self.idp_attribute_name))
 
-    def get_global_data(self):
-        return self.global_data
+        try:
+            user_data = self.user_data[user_id]
+        except KeyError:
+            raise NoUserData("Unknown user id '{}'".format(user_id))
+
+        idp_attributes.update(user_data)
+        idp_attributes.update(self.global_data)
+
+        return self._rename_attributes(idp_attributes)
+
+    def _rename_attributes(self, attributes):
+        translation = {"email": "mail", "testA": "sn", "university": "o"}
+
+        for attr_name, saml_name in translation.iteritems():
+            try:
+                val = attributes.pop(attr_name)
+                attributes[saml_name] = val
+            except KeyError:
+                pass
+
+        return attributes
