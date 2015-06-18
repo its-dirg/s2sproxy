@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 install_requires = [
     'pysaml2'
 ]
 
 tests_require = [
-    'pytest',
+    'pytest'
 ]
 
 setup(
@@ -18,12 +18,13 @@ setup(
     author_email='dirg@its.umu.se',
     license='Apache 2.0',
     url='https://github.com/its-dirg/s2sproxy',
-    packages=['s2sproxy'],
+    packages=find_packages('src/'),
     package_dir={'': 'src'},
     classifiers=["Development Status :: 4 - Beta",
                  "License :: OSI Approved :: Apache Software License",
                  "Topic :: Software Development :: Libraries :: Python Modules",
-                 "Programming Language :: Python :: 2.7"],
+                 "Programming Language :: Python :: 2.7",
+                 "Programming Language :: Python :: 3.4"],
     tests_require=tests_require,
     install_requires=install_requires,
     zip_safe=False,
