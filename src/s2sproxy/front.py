@@ -1,6 +1,8 @@
+from future import standard_library
+standard_library.install_aliases()
 #!/usr/bin/env python
 import logging
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from saml2.httputil import ServiceError
 from saml2.httputil import Response

@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import print_function
+from builtins import object
 import importlib
 import logging
 import os
@@ -181,7 +183,7 @@ class WsgiApplication(object):
                     return self.run_entity(spec, environ, start_response)
                 except Exception as err:
                     if not self.debug:
-                        print >> sys.stderr, "%s" % err
+                        print("%s" % err, file=sys.stderr)
                         traceback.print_exc()
                         LOGGER.exception("%s" % err)
                         resp = ServiceError("%s" % err)

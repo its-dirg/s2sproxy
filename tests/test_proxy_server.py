@@ -1,5 +1,7 @@
-import urllib
-import urlparse
+from future import standard_library
+standard_library.install_aliases()
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 
 from saml2 import BINDING_HTTP_REDIRECT
 import cherrypy
@@ -49,7 +51,7 @@ class ProxyTest(helper.CPWebCase):
         assert status == '303 See Other'
 
         url = self.get_redirect_location(headers)
-        req = urlparse.parse_qs(urlparse.urlsplit(url).query)
+        req = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
         assert 'SAMLRequest' in req
         assert 'RelayState' in req
 
@@ -58,11 +60,11 @@ class ProxyTest(helper.CPWebCase):
                                                 BINDING_HTTP_REDIRECT,
                                                 'test1')
         status, headers, body = self.getPage(action, method='POST',
-                                             body=urllib.urlencode(body))
+                                             body=urllib.parse.urlencode(body))
         assert status == '302 Found'
 
         url = self.get_redirect_location(headers)
-        req = urlparse.parse_qs(urlparse.urlsplit(url).query)
+        req = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
         assert 'SAMLResponse' in req
         assert 'RelayState' in req
         resp = self.sp.parse_authn_request_response(req['SAMLResponse'][0],

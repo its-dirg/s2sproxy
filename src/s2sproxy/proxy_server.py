@@ -24,7 +24,7 @@ def main():
     args = parser.parse_args()
 
     sys.path.insert(0, os.getcwd())
-    server_conf = __import__(args.server_config)
+    server_conf = __import__(args.server_config).server_conf
 
     wsgi_app = WsgiApplication(args.config, args.entityid,
                                args.debug).run_server

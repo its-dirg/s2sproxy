@@ -1,3 +1,4 @@
+from builtins import object
 __author__ = 'mathiashedstrom'
 
 class AttributeModuleBase(object):
@@ -29,6 +30,6 @@ class AttributeModuleBase(object):
         return self._translate(attr, self.translation)
 
     def _translate(self, attributes, translation):
-        for key, value in translation.iteritems():
+        for key, value in list(translation.items()):
             attributes[value] = attributes.pop(key)
         return attributes

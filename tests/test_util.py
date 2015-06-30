@@ -1,3 +1,4 @@
+from builtins import str
 import base64
 
 from saml2 import server, BINDING_HTTP_POST, BINDING_HTTP_REDIRECT
