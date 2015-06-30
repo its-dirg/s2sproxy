@@ -37,7 +37,8 @@ def main():
     })
     if server_conf.HTTPS:
         cherrypy.config.update({
-            'server.ssl_module': 'pyopenssl',
+            #'server.ssl_module': 'pyopenssl',
+            'server.ssl_module': 'builtin',
             'server.ssl_certificate': server_conf.SERVER_CERT,
             'server.ssl_private_key': server_conf.SERVER_KEY,
             'server.ssl_certificate_chain': server_conf.CERT_CHAIN,
