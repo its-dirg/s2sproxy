@@ -137,8 +137,6 @@ class SamlSP(service.Service):
             function
         """
 
-        binding = service.INV_BINDING_MAP[binding]
-
         _authn_response = self.unpack(binding)
 
         if not _authn_response["SAMLResponse"]:
@@ -146,6 +144,7 @@ class SamlSP(service.Service):
             resp = Unauthorized('Unknown user')
             return resp(self.environ, self.start_response)
 
+        binding = service.INV_BINDING_MAP[binding]
         try:
             _response = self.sp.parse_authn_request_response(
                 _authn_response["SAMLResponse"], binding,
