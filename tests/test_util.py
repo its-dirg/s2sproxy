@@ -57,6 +57,6 @@ class TestIdP(server.Server):
         http_args = self.apply_binding(BINDING_HTTP_POST, '%s' % _resp,
                                        destination, relay_state, response=True)
         url = http_args['url']
-        saml_response = base64.b64encode(str(_resp))
+        saml_response = base64.b64encode(str(_resp).encode("utf-8"))
         resp = {'SAMLResponse': saml_response, 'RelayState': relay_state}
         return url, resp

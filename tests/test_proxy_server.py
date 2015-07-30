@@ -1,14 +1,10 @@
-import urllib
-import urlparse
-
+from cherrypy.test import helper
 from saml2 import BINDING_HTTP_REDIRECT
 import cherrypy
-from cherrypy.test import helper
 
+from urllib.parse import urlsplit, parse_qs, urlencode
 from s2sproxy.server import WsgiApplication
-
 from tests.test_util import TestSP, TestIdP
-
 
 USERS = {
     'test1': {
@@ -50,7 +46,7 @@ class ProxyTest(helper.CPWebCase):
         assert status == '303 See Other'
 
         url = self.get_redirect_location(headers)
-        req = urlparse.parse_qs(urlparse.urlsplit(url).query)
+        req = parse_qs(urlsplit(url).query)
         assert 'SAMLRequest' in req
         assert 'RelayState' in req
 
@@ -59,11 +55,11 @@ class ProxyTest(helper.CPWebCase):
                                                 BINDING_HTTP_REDIRECT,
                                                 'test1')
         status, headers, body = self.getPage(action, method='POST',
-                                             body=urllib.urlencode(body))
+                                             body=urlencode(body))
         assert status == '302 Found'
 
         url = self.get_redirect_location(headers)
-        req = urlparse.parse_qs(urlparse.urlsplit(url).query)
+        req = parse_qs(urlsplit(url).query)
         assert 'SAMLResponse' in req
         assert 'RelayState' in req
         resp = self.sp.parse_authn_request_response(req['SAMLResponse'][0],
