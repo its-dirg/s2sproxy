@@ -33,7 +33,7 @@ class TestModule(AttributeModule):
     def _rename_attributes(self, attributes):
         translation = {"email": "mail", "testA": "sn", "university": "o"}
 
-        for attr_name, saml_name in translation.iteritems():
+        for attr_name, saml_name in translation.items():
             try:
                 val = attributes.pop(attr_name)
                 attributes[saml_name] = val

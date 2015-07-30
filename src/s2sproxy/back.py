@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import logging
 import time
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from saml2 import BINDING_HTTP_REDIRECT
 from saml2 import BINDING_HTTP_POST
@@ -119,7 +119,7 @@ class SamlSP(service.Service):
                                          relay_state=state_key)
             _sid = req_id
             logger.debug("ht_args: %s" % ht_args)
-        except Exception, exc:
+        except Exception as exc:
             logger.exception(exc)
             resp = ServiceError(
                 "Failed to construct the AuthnRequest: %s" % exc)
@@ -149,18 +149,18 @@ class SamlSP(service.Service):
             _response = self.sp.parse_authn_request_response(
                 _authn_response["SAMLResponse"], binding,
                 self.cache)
-        except UnknownPrincipal, excp:
+        except UnknownPrincipal as excp:
             logger.error("UnknownPrincipal: %s" % (excp,))
             resp = ServiceError("UnknownPrincipal: %s" % (excp,))
             return resp(self.environ, self.start_response)
-        except UnsupportedBinding, excp:
+        except UnsupportedBinding as excp:
             logger.error("UnsupportedBinding: %s" % (excp,))
             resp = ServiceError("UnsupportedBinding: %s" % (excp,))
             return resp(self.environ, self.start_response)
-        except VerificationError, err:
+        except VerificationError as err:
             resp = ServiceError("Verification error: %s" % (err,))
             return resp(self.environ, self.start_response)
-        except Exception, err:
+        except Exception as err:
             resp = ServiceError("Other error: %s" % (err,))
             return resp(self.environ, self.start_response)
 
@@ -196,4 +196,4 @@ if __name__ == "__main__":
     _config = config_factory("sp", sys.argv[1])
     sp = SamlSP(None, None, _config)
     maps = sp.register_endpoints()
-    print maps
+    print(maps)

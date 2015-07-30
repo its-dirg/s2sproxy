@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import logging
-from urlparse import parse_qs
+from urllib.parse import parse_qs
 
 from saml2 import BINDING_HTTP_REDIRECT
 from saml2 import BINDING_SOAP
@@ -50,7 +50,8 @@ class Service(object):
             return None
 
     def unpack_post(self):
-        _dict = parse_qs(get_post(self.environ))
+        post_body = get_post(self.environ).decode("utf-8")
+        _dict = parse_qs(post_body)
         logger.debug("unpack_post:: %s" % _dict)
         try:
             return dict([(k, v[0]) for k, v in _dict.items()])
