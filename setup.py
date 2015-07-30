@@ -6,10 +6,6 @@ install_requires = [
     'pysaml2'
 ]
 
-tests_require = [
-    'pytest'
-]
-
 setup(
     name='s2sproxy',
     version='0.1.0',
@@ -25,7 +21,6 @@ setup(
                  "Topic :: Software Development :: Libraries :: Python Modules",
                  "Programming Language :: Python :: 2.7",
                  "Programming Language :: Python :: 3.4"],
-    tests_require=tests_require,
     install_requires=install_requires,
     zip_safe=False,
 )
