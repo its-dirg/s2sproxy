@@ -6,6 +6,11 @@ env:
 install:
   - pip install -U tox
 
+addons:
+  apt:
+    packages:
+      - xmlsec1
+
 script:
   - tox -e $TOX_ENV
 
