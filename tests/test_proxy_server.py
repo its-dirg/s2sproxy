@@ -1,8 +1,11 @@
+import os
 from urllib.parse import urlsplit, parse_qs, urlencode
 
 from cherrypy.test import helper
+
 from saml2 import BINDING_HTTP_REDIRECT
 import cherrypy
+import sys
 
 from s2sproxy.server import WsgiApplication
 from tests.test_util import FakeSP, FakeIdP
@@ -26,6 +29,9 @@ USERS = {
         'uid': 'test1',
     },
 }
+
+# Add test directory to path to be able to import configurations
+sys.path.append(os.path.dirname(__file__))
 
 
 class ProxyTest(helper.CPWebCase):

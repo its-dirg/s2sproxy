@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
 
 from saml2 import BINDING_HTTP_REDIRECT
 from saml2 import BINDING_HTTP_POST
@@ -8,7 +9,13 @@ from example.test_module import TestModule
 
 BASE = 'https://example.com'
 
-ATTRIBUTE_MODULE = TestModule("users.json", "eduPersonPrincipalName")
+
+def full_path(path):
+    return os.path.join(os.path.dirname(__file__), path)
+
+
+ATTRIBUTE_MODULE = TestModule(full_path("../users.json"),
+                              "eduPersonPrincipalName")
 
 CONFIG = {
     "entityid": "{}/proxy.xml".format(BASE),
@@ -30,10 +37,10 @@ CONFIG = {
             }
         },
     },
-    "key_file": "pki/key.pem",
-    "cert_file": "pki/cert.pem",
+    "key_file": full_path("../pki/key.pem"),
+    "cert_file": full_path("../pki/cert.pem"),
     "metadata": {
-        "local": ["configurations/unittest_idp.xml",
-                  "configurations/unittest_sp.xml"],
+        "local": [full_path("unittest_idp.xml"),
+                  full_path("unittest_sp.xml")],
     },
 }
