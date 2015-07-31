@@ -2,14 +2,6 @@
 
 from setuptools import setup, find_packages
 
-install_requires = [
-    'pysaml2'
-]
-
-tests_require = [
-    'pytest'
-]
-
 setup(
     name='s2sproxy',
     version='0.1.0',
@@ -20,12 +12,10 @@ setup(
     url='https://github.com/its-dirg/s2sproxy',
     packages=find_packages('src/'),
     package_dir={'': 'src'},
-    classifiers=["Development Status :: 4 - Beta",
-                 "License :: OSI Approved :: Apache Software License",
-                 "Topic :: Software Development :: Libraries :: Python Modules",
-                 "Programming Language :: Python :: 2.7",
-                 "Programming Language :: Python :: 3.4"],
-    tests_require=tests_require,
-    install_requires=install_requires,
+    classifiers=['Development Status :: 4 - Beta',
+                 'License :: OSI Approved :: Apache Software License',
+                 'Topic :: Software Development :: Libraries :: Python Modules',
+                 'Programming Language :: Python :: 2.7',
+                 'Programming Language :: Python :: 3.4'],
     zip_safe=False,
 )

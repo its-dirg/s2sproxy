@@ -5,3 +5,5 @@ example/*_conf.py
 *.xml
 *.db
 *static/
+*.egg-info
+.tox/

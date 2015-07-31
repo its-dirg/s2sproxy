@@ -1,20 +1,19 @@
-import urllib
-import urlparse
+import os
+from urllib.parse import urlsplit, parse_qs, urlencode
+
+from cherrypy.test import helper
 
 from saml2 import BINDING_HTTP_REDIRECT
 import cherrypy
-from cherrypy.test import helper
+import sys
 
 from s2sproxy.server import WsgiApplication
-
-from tests.test_util import TestSP, TestIdP
-
+from tests.test_util import FakeSP, FakeIdP
 
 USERS = {
     'test1': {
         'c': 'SE',
         'displayName': 'Test1',
-        'mail': 'test1@example.com',
         'eduPersonPrincipalName': 'test1@example.com',
         'eduPersonScopedAffiliation': 'staff@example.com',
         'eduPersonTargetedID': 'one!for!all',
@@ -31,11 +30,14 @@ USERS = {
     },
 }
 
+# Add test directory to path to be able to import configurations
+sys.path.append(os.path.dirname(__file__))
+
 
 class ProxyTest(helper.CPWebCase):
     def setUp(self):
-        self.sp = TestSP('tests.configurations.sp_conf')
-        self.idp = TestIdP(USERS)
+        self.sp = FakeSP('tests.configurations.sp_conf')
+        self.idp = FakeIdP(USERS)
 
     @staticmethod
     def setup_server():
@@ -50,7 +52,7 @@ class ProxyTest(helper.CPWebCase):
         assert status == '303 See Other'
 
         url = self.get_redirect_location(headers)
-        req = urlparse.parse_qs(urlparse.urlsplit(url).query)
+        req = parse_qs(urlsplit(url).query)
         assert 'SAMLRequest' in req
         assert 'RelayState' in req
 
@@ -59,11 +61,11 @@ class ProxyTest(helper.CPWebCase):
                                                 BINDING_HTTP_REDIRECT,
                                                 'test1')
         status, headers, body = self.getPage(action, method='POST',
-                                             body=urllib.urlencode(body))
+                                             body=urlencode(body))
         assert status == '302 Found'
 
         url = self.get_redirect_location(headers)
-        req = urlparse.parse_qs(urlparse.urlsplit(url).query)
+        req = parse_qs(urlsplit(url).query)
         assert 'SAMLResponse' in req
         assert 'RelayState' in req
         resp = self.sp.parse_authn_request_response(req['SAMLResponse'][0],
