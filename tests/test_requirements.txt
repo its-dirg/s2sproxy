@@ -1,0 +1,2 @@
+cherrypy
+nose # just for CherryPy test helper

@@ -1,22 +1,19 @@
 #!/usr/bin/env python
-from __future__ import print_function
-from builtins import object
 import importlib
 import logging
-import os
 import re
 import sys
 import traceback
 
 from saml2.config import config_factory
-
 from saml2.httputil import Unauthorized
 from saml2.httputil import NotFound
+
 from saml2.httputil import ServiceError
 
 from s2sproxy.back import SamlSP
 from s2sproxy.front import SamlIDP
-
+from s2sproxy.util.attribute_module import NoUserData
 
 LOGGER = logging.getLogger("")
 LOGFILE_NAME = 's2s.log'
@@ -34,7 +31,6 @@ class WsgiApplication(object):
         self.urls = []
         self.cache = {}
         self.debug = debug
-        self._load_attribute_module(config_file)
 
         sp_conf = config_factory("sp", config_file)
         idp_conf = config_factory("idp", config_file)
@@ -44,30 +40,21 @@ class WsgiApplication(object):
             "IDP": idp_conf
         }
 
-        sp = SamlSP(None, None, self.config["SP"], self.cache)
-        self.urls.extend(sp.register_endpoints())
-
-        idp = SamlIDP(None, None, self.config["IDP"], self.cache, None)
-        self.urls.extend(idp.register_endpoints())
-
+        conf = importlib.import_module(config_file)
+        self.attribute_module = conf.ATTRIBUTE_MODULE
         # If entityID is set it means this is a proxy in front of one IdP
         if entityid:
             self.entity_id = entityid
             self.sp_args = {}
         else:
             self.entity_id = None
-            conf = importlib.import_module(config_file)
             self.sp_args = {"discosrv": conf.DISCO_SRV}
 
-    def _load_attribute_module(self, config_file):
-        head, tail = os.path.split(config_file)
-        if head == "":
-            if sys.path[0] != ".":
-                sys.path.insert(0, ".")
-        else:
-            sys.path.insert(0, head)
-        mod = importlib.import_module(tail)
-        self.attribute_module = mod.CONFIG["attribute_module"]["module"]
+        sp = SamlSP(None, None, self.config["SP"], self.cache, **self.sp_args)
+        self.urls.extend(sp.register_endpoints())
+
+        idp = SamlIDP(None, None, self.config["IDP"], self.cache, None)
+        self.urls.extend(idp.register_endpoints())
 
     def incoming(self, info, environ, start_response, relay_state):
         """
@@ -120,7 +107,12 @@ class WsgiApplication(object):
         _authn = {"class_ref": _authn_info[0], "authn_auth": _authn_info[1][0]}
 
         # This is where any possible modification of the assertion is made
-        response.ava = self.attribute_module.get_attributes(response.ava)
+        try:
+            response.ava = self.attribute_module.get_attributes(response.ava)
+        except NoUserData as e:
+            LOGGER.error(
+                "User authenticated at IdP but not found by attribute module.")
+            raise
 
         # Will signed the response by default
         resp = _idp.construct_authn_response(

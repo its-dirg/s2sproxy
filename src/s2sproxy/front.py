@@ -1,5 +1,3 @@
-from future import standard_library
-standard_library.install_aliases()
 #!/usr/bin/env python
 import logging
 from urllib.parse import urlparse

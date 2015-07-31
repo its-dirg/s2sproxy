@@ -4,8 +4,11 @@
 from saml2 import BINDING_HTTP_REDIRECT
 from saml2 import BINDING_HTTP_POST
 
+from example.test_module import TestModule
 
 BASE = 'https://example.com'
+
+ATTRIBUTE_MODULE = TestModule("users.json", "eduPersonPrincipalName")
 
 CONFIG = {
     "entityid": "{}/proxy.xml".format(BASE),

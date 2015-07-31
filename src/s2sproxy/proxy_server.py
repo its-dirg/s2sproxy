@@ -24,7 +24,7 @@ def main():
     args = parser.parse_args()
 
     sys.path.insert(0, os.getcwd())
-    server_conf = __import__(args.server_config).server_conf
+    server_conf = __import__(args.server_config)
 
     wsgi_app = WsgiApplication(args.config, args.entityid,
                                args.debug).run_server
@@ -37,8 +37,6 @@ def main():
     })
     if server_conf.HTTPS:
         cherrypy.config.update({
-            #'server.ssl_module': 'pyopenssl',
-            'server.ssl_module': 'builtin',
             'server.ssl_certificate': server_conf.SERVER_CERT,
             'server.ssl_private_key': server_conf.SERVER_KEY,
             'server.ssl_certificate_chain': server_conf.CERT_CHAIN,

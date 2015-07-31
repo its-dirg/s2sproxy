@@ -1,16 +1,11 @@
-from future import standard_library
-standard_library.install_aliases()
-import urllib.request, urllib.parse, urllib.error
-import urllib.parse
+from urllib.parse import urlsplit, parse_qs, urlencode
 
+from cherrypy.test import helper
 from saml2 import BINDING_HTTP_REDIRECT
 import cherrypy
-from cherrypy.test import helper
 
 from s2sproxy.server import WsgiApplication
-
-from tests.test_util import TestSP, TestIdP
-
+from tests.test_util import FakeSP, FakeIdP
 
 USERS = {
     'test1': {
@@ -35,8 +30,8 @@ USERS = {
 
 class ProxyTest(helper.CPWebCase):
     def setUp(self):
-        self.sp = TestSP('tests.configurations.sp_conf')
-        self.idp = TestIdP(USERS)
+        self.sp = FakeSP('tests.configurations.sp_conf')
+        self.idp = FakeIdP(USERS)
 
     @staticmethod
     def setup_server():
@@ -51,7 +46,7 @@ class ProxyTest(helper.CPWebCase):
         assert status == '303 See Other'
 
         url = self.get_redirect_location(headers)
-        req = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
+        req = parse_qs(urlsplit(url).query)
         assert 'SAMLRequest' in req
         assert 'RelayState' in req
 
@@ -60,17 +55,19 @@ class ProxyTest(helper.CPWebCase):
                                                 BINDING_HTTP_REDIRECT,
                                                 'test1')
         status, headers, body = self.getPage(action, method='POST',
-                                             body=urllib.parse.urlencode(body))
+                                             body=urlencode(body))
         assert status == '302 Found'
 
         url = self.get_redirect_location(headers)
-        req = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
+        req = parse_qs(urlsplit(url).query)
         assert 'SAMLResponse' in req
         assert 'RelayState' in req
         resp = self.sp.parse_authn_request_response(req['SAMLResponse'][0],
                                                     BINDING_HTTP_REDIRECT)
         identity = resp.ava
         assert identity["displayName"][0] == "Test1"
+        assert identity["sn"][0] == "test1@valueA"
+        assert identity['o'][0] == "Small university"
 
     def get_redirect_location(self, headers):
         for header, value in headers:

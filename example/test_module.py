@@ -1,29 +1,43 @@
-__author__ = 'mathiashedstrom'
+import json
 
-from s2sproxy.util.attribute_module_base import AttributeModuleBase
+from s2sproxy.util.attribute_module import AttributeModule, NoUserData
 
-class TestModule(AttributeModuleBase):
 
-    def _get_user_data(self):
-        return [
-            {"email": ["a@test.com"],
-             "testA": ["a@valueA"],
-             "testB": ["a@valueB"]},
-            {"email": ["b@test.com"],
-             "testA": ["b@valueA"],
-             "testB": ["b@valueB"]},
-            {"email": ["c@test.com"],
-             "testA": ["c@valueA"],
-             "testB": ["c@valueB"]}
-                ]
+class TestModule(AttributeModule):
+    def __init__(self, json_file, idp_attribute_name):
+        self.idp_attribute_name = idp_attribute_name
 
-    def _get_global_data(self):
-        return {
-                "university": "small university",
-                "co": "sweden",
-                }
+        with open(json_file) as f:
+            self.user_data = json.load(f)
 
-    def get_attributes(self, eduid_attributes):
-        attributes = super(TestModule,self).get_attributes(eduid_attributes)
-        eduid_attributes.update(attributes)
-        return eduid_attributes
+        self.global_data = {'university': 'Small university', 'co': 'Sweden'}
+
+    def get_attributes(self, idp_attributes):
+        try:
+            user_id = idp_attributes[self.idp_attribute_name][0]
+        except KeyError:
+            raise NoUserData(
+                "Necessary attribute '{}' not returned by IdP.".format(
+                    self.idp_attribute_name))
+
+        try:
+            user_data = self.user_data[user_id]
+        except KeyError:
+            raise NoUserData("Unknown user id '{}'".format(user_id))
+
+        idp_attributes.update(user_data)
+        idp_attributes.update(self.global_data)
+
+        return self._rename_attributes(idp_attributes)
+
+    def _rename_attributes(self, attributes):
+        translation = {"email": "mail", "testA": "sn", "university": "o"}
+
+        for attr_name, saml_name in translation.items():
+            try:
+                val = attributes.pop(attr_name)
+                attributes[saml_name] = val
+            except KeyError:
+                pass
+
+        return attributes

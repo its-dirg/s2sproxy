@@ -1,4 +1,3 @@
-from builtins import str
 import base64
 
 from saml2 import server, BINDING_HTTP_POST, BINDING_HTTP_REDIRECT
@@ -7,7 +6,7 @@ from saml2.client import Saml2Client
 from saml2.config import config_factory
 
 
-class TestSP(Saml2Client):
+class FakeSP(Saml2Client):
     def __init__(self, config_module):
         Saml2Client.__init__(self, config_factory('sp', config_module))
 
@@ -33,7 +32,7 @@ class TestSP(Saml2Client):
         return url
 
 
-class TestIdP(server.Server):
+class FakeIdP(server.Server):
     def __init__(self, user_db):
         server.Server.__init__(self, 'configurations.idp_conf')
         self.user_db = user_db
@@ -58,6 +57,6 @@ class TestIdP(server.Server):
         http_args = self.apply_binding(BINDING_HTTP_POST, '%s' % _resp,
                                        destination, relay_state, response=True)
         url = http_args['url']
-        saml_response = base64.b64encode(str(_resp))
+        saml_response = base64.b64encode(str(_resp).encode("utf-8"))
         resp = {'SAMLResponse': saml_response, 'RelayState': relay_state}
         return url, resp
