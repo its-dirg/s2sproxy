@@ -17,8 +17,8 @@ def main():
                         help="Entity id for the underlying IdP. If not "
                              "specified, a discovery server will be used "
                              "instead.")
-    parser.add_argument(dest="config",
-                        help="Configuration file for the pysaml sp and idp.")
+    parser.add_argument(dest="proxy_config",
+                        help="Configuration file for the proxy (pysaml2 sp and idp).")
     parser.add_argument(dest="server_config",
                         help="Configuration file with server settings.")
     args = parser.parse_args()
@@ -26,7 +26,7 @@ def main():
     sys.path.insert(0, os.getcwd())
     server_conf = __import__(args.server_config)
 
-    wsgi_app = WsgiApplication(args.config, args.entityid,
+    wsgi_app = WsgiApplication(args.proxy_config, args.entityid,
                                args.debug).run_server
     if args.debug:
         wsgi_app = DebuggedApplication(wsgi_app)
@@ -62,6 +62,7 @@ def main():
 
     cherrypy.engine.start()
     cherrypy.engine.block()
+
 
 if __name__ == '__main__':
     main()
