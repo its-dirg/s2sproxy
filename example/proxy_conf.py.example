@@ -23,7 +23,6 @@ def full_path(local_file):
     basedir = os.path.abspath(os.path.dirname(__file__))
     return os.path.join(basedir, local_file)
 
-# TODO GET BASE from server_conf
 HOST = 'localhost'
 PORT = 8090
 
@@ -42,7 +41,7 @@ CONFIG = {
     "valid_for": 168,
     "service": {
         "idp": {
-            "name": "Rolands IdP",
+            "name": "Proxy IdP",
             "endpoints": {
                 "single_sign_on_service": [
                     ("%s/sso/redirect" % BASE, BINDING_HTTP_REDIRECT),
@@ -54,7 +53,7 @@ CONFIG = {
                     "lifetime": {"minutes": 15},
                     "attribute_restrictions": None,  # means all I have
                     "name_form": NAME_FORMAT_URI,
-                    "entity_categories": ["swamid", "edugain"],
+                    "entity_categories": ["edugain"],
                     "fail_on_missing_requested": False
                 },
             },
@@ -85,15 +84,14 @@ CONFIG = {
         "local": ["sp.xml", "idp.xml"],
     },
     "organization": {
-        "display_name": "Rolands Identiteter",
-        "name": "Rolands Identiteter",
+        "display_name": "Example Identities",
+        "name": "Example Identiteter",
         "url": "http://www.example.com",
     },
     "contact_person": [
         {
             "contact_type": "technical",
-            "given_name": "Roland",
-            "sur_name": "Hedberg",
+            "given_name": "Technical",
             "email_address": "technical@example.com"
         }, {
             "contact_type": "support",

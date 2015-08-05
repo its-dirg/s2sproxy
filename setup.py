@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+setup.py
+"""
+
 from setuptools import setup, find_packages
 
 setup(
@@ -17,5 +21,6 @@ setup(
                  'Topic :: Software Development :: Libraries :: Python Modules',
                  'Programming Language :: Python :: 2.7',
                  'Programming Language :: Python :: 3.4'],
+    install_requires=["pysaml2 >= 3.0.0"],
     zip_safe=False,
 )
