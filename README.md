@@ -43,6 +43,14 @@ Important parameters:
 * Metadata for SP's and IdP's: ``CONFIG["metadata"]`` in ``proxy_conf.py``
 * SSL/TLS certificates (for https): ``SERVER_KEY``, ``SERVER_CERT``, ``CERT_CHAIN``
 
+Generate metadata
+^^^^^^^^^^^^^^^^^
+
+SAML metadata for the frontend SP and backend IdP of the proxy can be generated with the
+``make_metadata.py`` script bundled with pysaml2:
+
+    [<optional virtualenv path>/]make_metadata.py proxy_conf > proxy.xml
+
 Running it
 ==========
 
