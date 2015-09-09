@@ -10,8 +10,7 @@ Ultimately this proxy will be able to achieve the following things:
 * Adding information to or filtering assertions.
 * Adding an extra authentication factor.
 
-Installation
-============
+## Installation
 
     git clone https://github.com/its-dirg/s2sproxy
     cd s2sproxy
@@ -24,8 +23,7 @@ Ubuntu with:
     apt-get install xmlsec1
 
 
-Configuration
-=============
+## Configuration
 
 The configuration of the proxy is managed in ``proxy_conf.py``, while the webserver
 running the proxy application is managed in ``server_conf.py``.
@@ -44,16 +42,14 @@ Important parameters:
 * Metadata for SP's and IdP's communicating with the proxy: ``CONFIG["metadata"]`` in ``proxy_conf.py``
 * SSL/TLS certificates (for https): ``SERVER_KEY``, ``SERVER_CERT``, ``CERT_CHAIN``
 
-Generate metadata
-^^^^^^^^^^^^^^^^^
+### Generate metadata
 
 SAML metadata for the frontend SP and backend IdP of the proxy can be generated with the
 ``make_metadata.py`` script bundled with pysaml2:
 
     [<optional virtualenv path>/]make_metadata.py proxy_conf > proxy.xml
 
-Running it
-==========
+## Running it
 
 The proxy only supports Python 3, and can be started with:
 
