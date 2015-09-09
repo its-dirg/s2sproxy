@@ -73,7 +73,7 @@ CONFIG = {
     },
     "debug": 1,
     "key_file": full_path("pki/mykey.pem"),  # Path to the private key
-    "cert_file": full_path("pki/mykey.crt"),  # Path to the certificate
+    "cert_file": full_path("pki/mycert.pem"),  # Path to the certificate
     "metadata": {
         "local": ["sp.xml", "idp.xml"],  # Path to the metadata of the SP's and IdP's
     },
