@@ -20,7 +20,9 @@ Installation
     pip install .
     pip install -r requirements.txt # additional dependencies to run the server
     
-pysaml2 also requires ``xmlsec1``, which can be installed on Ubuntu with::
+pysaml2 also requires ``xmlsec1``, which can be installed on Ubuntu with:
+
+::
 
     apt-get install xmlsec1
 
@@ -52,3 +54,6 @@ The proxy only supports Python 3, and can be started with:
 ::
 
     python3 -m s2sproxy proxy_conf server_conf
+
+If you want to use the example certs/keys provided, make sure the current working directory is 
+``example/`` and that it contains your modified configuration files before running the above command. 
