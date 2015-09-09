@@ -27,8 +27,8 @@ Configuration
 The configuration consists is managed two files, ``server_conf.py`` and
 ``proxy_conf.py``.
 
-To setup the proxy server, copy ``server_conf.py.example`` to
-``server_conf.py`` and ``proxy_conf.py.example`` to ``proxy_conf.py``.
+To setup the proxy server, copy ``example/server_conf.py.example`` to
+``server_conf.py`` and ``example/proxy_conf.py.example`` to ``proxy_conf.py``.
 See the comments in each file and modify the necessary parameters.
 
 Running it
