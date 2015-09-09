@@ -34,6 +34,7 @@ See the comments in each file and modify the necessary parameters.
 Running it
 ==========
 
+The proxy only supports Python 3, and can be started with:
 ::
 
-    python -m s2sproxy proxy_conf server_conf
+    python3 -m s2sproxy proxy_conf server_conf

@@ -19,7 +19,6 @@ setup(
     classifiers=['Development Status :: 4 - Beta',
                  'License :: OSI Approved :: Apache Software License',
                  'Topic :: Software Development :: Libraries :: Python Modules',
-                 'Programming Language :: Python :: 2.7',
                  'Programming Language :: Python :: 3.4'],
     install_requires=["pysaml2 >= 3.0.0"],
     zip_safe=False,
