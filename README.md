@@ -13,16 +13,12 @@ Ultimately this proxy will be possible to use to accomplish these things:
 Installation
 ============
 
-::
-
     git clone https://github.com/its-dirg/s2sproxy
     cd s2sproxy
     pip install .
     pip install -r requirements.txt # additional dependencies to run the server
     
 pysaml2 also requires ``xmlsec1``, which can be installed on Ubuntu with:
-
-::
 
     apt-get install xmlsec1
 
@@ -51,7 +47,6 @@ Running it
 ==========
 
 The proxy only supports Python 3, and can be started with:
-::
 
     python3 -m s2sproxy proxy_conf server_conf
 
