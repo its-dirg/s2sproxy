@@ -19,6 +19,10 @@ Installation
     cd s2sproxy
     pip install .
     pip install -r requirements.txt # additional dependencies to run the server
+    
+pysaml2 also requires ``xmlsec1``, which can be installed on Ubuntu with::
+
+    apt-get install xmlsec1
 
 
 Configuration
