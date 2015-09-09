@@ -33,7 +33,17 @@ The configuration consists is managed two files, ``server_conf.py`` and
 
 To setup the proxy server, copy ``example/server_conf.py.example`` to
 ``server_conf.py`` and ``example/proxy_conf.py.example`` to ``proxy_conf.py``.
-See the comments in each file and modify the necessary parameters.
+See the comments in each file and modify the parameters as necessary.
+
+Important parameters:
+
+* Server info: ``HOST`` and ``PORT`` in both ``proxy_conf.py`` and ``server_conf.py`
+* xmlsec binary: ``xmlsec_path`` in ``proxy_conf.py``
+* Url for discovery server: ``DISCO_SRV`` in ``proxy_conf.py`` or ``-e`` command line parameter
+* Attribute transformation module: ``ATTRIBUTE_MODULE`` in ``proxy_conf.py``
+* Private key and certificate for SAML: ``CONFIG["key_file"]`` and ``CONFIG["key_file"]`` in ``proxy_conf.py``
+* Metadata for SP's and IdP's: ``CONFIG["metadata"]`` in ``proxy_conf.py``
+* SSL/TLS certificates (for https): ``SERVER_KEY``, ``SERVER_CERT``, ``CERT_CHAIN``
 
 Running it
 ==========
