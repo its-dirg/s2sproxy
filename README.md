@@ -17,7 +17,7 @@ Installation
 
     git clone https://github.com/its-dirg/s2sproxy
     cd s2sproxy
-    pip install -e .
+    pip install .
     pip install -r requirements.txt # additional dependencies to run the server
 
 
