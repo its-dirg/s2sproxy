@@ -104,7 +104,14 @@ class WsgiApplication(object):
 
         # Slightly awkward, should be done better
         _authn_info = response.authn_info()[0]
-        _authn = {"class_ref": _authn_info[0], "authn_auth": _authn_info[1][0]}
+
+        # If the <AuthnContext> in the response contained one or more
+        # <AuthenticatingAuthority> elements then use the first one, otherwise
+        # default to using the issuer, which will be the issuing IdP.
+        if _authn_info[1]:
+            _authn = {"class_ref": _authn_info[0], "authn_auth": _authn_info[1][0]}
+        else:
+            _authn = {"class_ref": _authn_info[0], "authn_auth": response.issuer()}
 
         # This is where any possible modification of the assertion is made
         try:
