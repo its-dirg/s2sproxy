@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import logging
 from urllib.parse import parse_qs
 
@@ -12,6 +14,7 @@ from saml2.httputil import ServiceError
 from saml2.httputil import Response
 from saml2.httputil import BadRequest
 
+# Module level logger.
 logger = logging.getLogger(__name__)
 
 BINDING_MAP = {
@@ -26,7 +29,7 @@ INV_BINDING_MAP = {v: k for k, v in BINDING_MAP.items()}
 
 
 class Service(object):
-    # Common operations that all services need
+    # Common operations that all services need.
     def __init__(self, environ, start_response):
         self.environ = environ
         logger.debug("ENVIRON: %s" % environ)

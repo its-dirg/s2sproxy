@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import logging
 import time
 from urllib.parse import urlparse
@@ -17,14 +19,10 @@ from saml2.s_utils import UnsupportedBinding
 from s2sproxy.service import BINDING_MAP
 import s2sproxy.service as service
 
-
+# Module level logger.
 logger = logging.getLogger(__name__)
 
-# -----------------------------------------------------------------------------
-# Authentication request constructor
-# -----------------------------------------------------------------------------
-
-
+# Authentication request constructor.
 class SamlSP(service.Service):
     def __init__(self, environ, start_response, config, cache=None,
                  outgoing=None, discosrv=None, bindings=None):
@@ -57,11 +55,11 @@ class SamlSP(service.Service):
             resp = Unauthorized("You must chose an IdP")
             return resp(self.environ, self.start_response)
         else:
-            # should I check the state variable ?
+            # TODO should I check the state variable ?
             return self.authn_request(entity_id, info["state"])
 
     def store_state(self, authn_req, relay_state, req_args):
-        # Which page was accessed to get here
+        # Which page was accessed to get here.
         came_from = geturl(self.environ)
         key = str(hash(came_from + self.environ["REMOTE_ADDR"] + str(time.time())))
         logger.debug("[sp.challenge] RelayState >> '%s'" % came_from)
@@ -82,11 +80,11 @@ class SamlSP(service.Service):
         _cli = self.sp
 
         eid = _cli.config.entityid
-        # returns list of 2-tuples
+        # Returns list of 2-tuples.
         dr = _cli.config.getattr("endpoints", "sp")["discovery_response"]
-        # The first value of the first tuple is the one I want
+        # The first value of the first tuple is the one I want.
         ret = dr[0][0]
-        # append it to the disco server URL
+        # Append it to the disco server URL.
         ret += "?state=%s" % state_key
         loc = _cli.create_discovery_service_request(self.discosrv, eid,
                                                     **{"return": ret})
@@ -99,7 +97,7 @@ class SamlSP(service.Service):
         req_args = self.cache[state_key][2]
 
         try:
-            # Picks a binding to use for sending the Request to the IDP
+            # Picks a binding to use for sending the Request to the IDP.
             _binding, destination = _cli.pick_binding(
                 "single_sign_on_service", self.bindings, "idpsso",
                 entity_id=entity_id)
@@ -109,7 +107,7 @@ class SamlSP(service.Service):
             # IDP should use to return the response.
             acs = _cli.config.getattr("endpoints", "sp")[
                 "assertion_consumer_service"]
-            # just pick one
+            # Just pick one.
             endp, return_binding = acs[0]
             req_id, req = _cli.create_authn_request(destination,
                                                     binding=return_binding,
@@ -125,7 +123,7 @@ class SamlSP(service.Service):
                 "Failed to construct the AuthnRequest: %s" % exc)
             return resp(self.environ, self.start_response)
 
-        # remember the request
+        # Remember the request.
         self.cache[_sid] = state_key
         resp = self.response(_binding, ht_args, do_not_start_response=True)
         return resp(self.environ, self.start_response)
@@ -187,7 +185,6 @@ class SamlSP(service.Service):
                                                             BINDING_MAP[binding])))
 
         return url_map
-
 
 if __name__ == "__main__":
     import sys
