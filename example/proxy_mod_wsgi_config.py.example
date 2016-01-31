@@ -99,6 +99,7 @@ CONFIG = {
     "debug": 1,
     "key_file": PEM_KEY_PATH,    # Path to the private key.
     "cert_file": PEM_CERT_PATH,  # Path to the certificate.
+    "encryption_keypairs" : [{"key_file" : PEM_KEY_PATH, "cert_file": PEM_CERT_PATH}],
     "metadata": {
         "local": ["/etc/s2sproxy/metadata.xml"],  # Path to the metadata of the SP's and IdP's.
     },
