@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import logging
 from urllib.parse import urlparse
 
@@ -12,9 +13,8 @@ from saml2.server import Server
 
 import s2sproxy.service as service
 
-
+# Module level logger.
 logger = logging.getLogger(__name__)
-
 
 class SamlIDP(service.Service):
     def __init__(self, environ, start_response, conf, cache, incoming):
@@ -49,7 +49,7 @@ class SamlIDP(service.Service):
         _authn_req = req_info.message
         logger.debug("%s" % _authn_req)
 
-        # Check that I know where to send the reply to
+        # Check that I know where to send the reply to.
         try:
             binding_out, destination = self.idp.pick_binding(
                 "assertion_consumer_service",
@@ -112,7 +112,7 @@ class SamlIDP(service.Service):
             return resp(self.environ, self.start_response)
 
         _binding = _dict["resp_args"]["binding"]
-        if _dict["response"]:  # An error response
+        if _dict["response"]:  # An error response.
             http_args = self.idp.apply_binding(
                 _binding, "%s" % _dict["response"],
                 _dict["resp_args"]["destination"],

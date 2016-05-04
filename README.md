@@ -26,7 +26,8 @@ Ubuntu with:
 ## Configuration
 
 The configuration of the proxy is managed in ``proxy_conf.py``, while the webserver
-running the proxy application is managed in ``server_conf.py``.
+running the proxy application is managed in ``server_conf.py``. See below for configuration
+details for ``mod_wsgi`` for Apache HTTP Server (Apache).
 
 To setup the proxy server, copy ``example/server_conf.py.example`` to
 ``server_conf.py`` and ``example/proxy_conf.py.example`` to ``proxy_conf.py``.
@@ -57,3 +58,24 @@ The proxy only supports Python 3, and can be started with:
 
 If you want to use the example certs/keys provided, make sure the current working directory is 
 ``example/`` and that it contains your modified configuration files before running the above command. 
+
+## Integration with mod_wsgi
+
+A version of mod_wsgi that supports Python 3 is required.
+
+Copy ``example/proxy_mod_wsgi.wsgi`` to ``/usr/local/www/wsgi/proxy.wsgi`` or your preferred
+location for mod_wsgi scripts. Create the directories ``/var/log/s2sproxy`` and ``/var/cache/s2sproxy``
+with sufficient permissions so that the Apache process can write
+to them. Copy ``example/proxy_mod_wsgi_config.py.example`` to ``/etc/s2sproxy/config.py``
+and edit as appropriate for your deployment.
+
+Edit your Apache configuration to mount the WSGI script, for example:
+
+    # Allow access to the WSGI application.
+    <Directory /usr/local/www/wsgi>
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    # Mount the proxy WSGI application at root of virtual host.
+    WSGIScriptAlias / /usr/local/www/wsgi/proxy.wsgi

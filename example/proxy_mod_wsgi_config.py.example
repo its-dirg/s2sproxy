@@ -1,0 +1,131 @@
+# -*- coding: utf-8 -*-
+#
+# Example configuration file when using mod_wsgi.
+
+# Used for configuring pysaml2 SAML operation.
+from saml2 import BINDING_HTTP_REDIRECT
+from saml2 import BINDING_HTTP_POST
+from saml2.extension.idpdisc import BINDING_DISCO
+from saml2.saml import NAME_FORMAT_URI
+from saml2.saml import NAMEID_FORMAT_TRANSIENT
+from saml2.saml import NAMEID_FORMAT_PERSISTENT
+
+# Use to support COmanage Registry as an attribute authority.
+from s2sproxy_module.comanage import COmanageAttributeModule
+from s2sproxy.util.attribute_module import IdentityAttributes
+
+# SAML entityID for the proxy.
+ENTITY_ID = 'https://some.server/proxy'
+
+# Path to the xmlsec1 binary.
+XMLSEC_PATH = '/usr/bin/xmlsec1'
+
+# Path to PEM cert and key used for SAML.
+PEM_CERT_PATH = '/etc/s2sproxy/cert.pem'
+PEM_KEY_PATH  = '/etc/s2sproxy/key.pem'
+
+# Path to local SAML metadata file.
+LOCAL_SAML_METADATA = '/etc/s2sproxy/metadata.xml'
+
+# Server host name.
+HOST = 'some.server'
+
+# Server port
+PORT = 443
+
+# URL for discovery service.
+DISCO_SRV = 'https://some.server/shibboleth-ds/index.html'
+
+# Example of a module instance for transformation of 
+# the attributes from the IdP. This example leverages
+# the COmanage Registry. 
+COMANAGE_REGISTRY_URL = 'https://some.server/registry'
+COMANAGE_REST_API_CREDENTIAL = ('proxy_user','PASSWORD')
+COMANAGE_CO_ID = 2
+COMANAGE_IDP_ASSERTED_IDENTIFIER = 'eduPersonPrincipalName'
+COMANAGE_VO_IDENTIFIER_TYPE = 'some_identifier_type'
+
+ATTRIBUTE_MODULE = COmanageAttributeModule(
+                    COMANAGE_REGISTRY_URL, 
+                    COMANAGE_REST_API_CREDENTIAL, 
+                    COMANAGE_CO_ID, 
+                    COMANAGE_IDP_ASSERTED_IDENTIFIER,
+                    COMANAGE_VO_IDENTIFIER_TYPE)
+
+# pysaml2 configuration.
+# See https://github.com/rohe/pysaml2/blob/master/doc/howto/config.rst
+if PORT == 443:
+    _base = 'https://%s' % HOST
+else:
+    _base = 'https://%s:%s' % (HOST, PORT)
+
+CONFIG = {
+    "entityid": ENTITY_ID,
+    "description": "A SAML2SAML proxy",
+    "service": {
+        "idp": {
+            "name": "Proxy IdP",
+            "endpoints": {
+                "single_sign_on_service": [
+                    ("%s/sso/redirect" % _base, BINDING_HTTP_REDIRECT),
+                    ("%s/sso/post" % _base, BINDING_HTTP_POST),
+                ],
+            },
+            "policy": {
+                "default": {
+                    "lifetime": {"minutes": 15},
+                    "attribute_restrictions": None,  # Means all available.
+                    "name_form": NAME_FORMAT_URI,
+                    "fail_on_missing_requested": False
+                },
+            },
+            "subject_data": "./idp.subject",
+            "name_id_format": [NAMEID_FORMAT_TRANSIENT,
+                               NAMEID_FORMAT_PERSISTENT],
+            "want_authn_requests_signed": False
+        },
+        "sp": {
+            "endpoints": {
+                "assertion_consumer_service": [
+                    ("%s/acs/post" % _base, BINDING_HTTP_POST),
+                    ("%s/acs/redirect" % _base, BINDING_HTTP_REDIRECT)
+                ],
+                "discovery_response": [
+                    ("%s/disco" % _base, BINDING_DISCO)
+                ]
+            }
+        },
+    },
+    "debug": 1,
+    "key_file": PEM_KEY_PATH,    # Path to the private key.
+    "cert_file": PEM_CERT_PATH,  # Path to the certificate.
+    "encryption_keypairs" : [{"key_file" : PEM_KEY_PATH, "cert_file": PEM_CERT_PATH}],
+    "metadata": {
+        "local": ["/etc/s2sproxy/metadata.xml"],  # Path to the metadata of the SP's and IdP's.
+    },
+    "organization": {
+        "display_name": "Example Identities",
+        "name": "Example Identiteter",
+        "url": "http://www.example.com",
+    },
+    "contact_person": [
+        {
+            "contact_type": "technical",
+            "given_name": "Technical",
+            "email_address": "technical@example.com"
+        }, {
+            "contact_type": "support",
+            "given_name": "Support",
+            "email_address": "support@example.com"
+        },
+    ],
+    "xmlsec_binary": XMLSEC_PATH,
+    "logger": {
+        "rotating": {
+            "filename": "/var/log/s2sproxy/pysaml2.log",
+            "maxBytes": 500000,
+            "backupCount": 5,
+        },
+        "loglevel": "debug",
+    }
+}
